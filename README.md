@@ -28,4 +28,3 @@ to create the `gold` labeling function
 ```Python
 gold = export.is_gold
 ```
-

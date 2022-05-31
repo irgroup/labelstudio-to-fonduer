@@ -101,9 +101,6 @@ def create_ls_data_dir(ls_base_dir: str, project_name: str) -> str:
     return os.path.join(ls_base_dir, project_name)
 
 
-import shutil
-
-
 def import_data_to_ls(
     project: label_studio_sdk.project.Project,
     ls_project_dir: str,
@@ -112,50 +109,32 @@ def import_data_to_ls(
     recursive: bool = False,
     k: int = 0,
 ):
-    """Import data to label studio (LS) by copying the files to the project dir and also to a html dir for later reference. If recursive is set, files from sub dirs are also included. If a k is specified only the top k files are imported.
-
-    Args:
-        project (label_studio_sdk.project.Project): LS project data is imported to.
-        ls_project_dir (str): Path to label studio project dir.
-        data_dir (str): Path to the data root dir to be imported.
-        html_data_dir (str): Path to the HTML dir for referencing.
-        recursive (bool, optional): Include sub dirs or not. Defaults to False.
-        k (int, optional): Include only the top k files. If k is 0, all files are imported. Defaults to 0.
-    """
+    SEPERATOR = os.sep
     early_stop = [True if k > 0 else False]
 
-    def import_to_ls(file_path):
-        split = file_path.split(os.sep)
-        file_name = split[-1]
-        subset_name = split[-2]
-
-        filename_extended = subset_name + "_" + file_name
-
-        shutil.copyfile(file_path, os.path.join(ls_project_dir, filename_extended))
-        shutil.copyfile(file_path, os.path.join(html_data_dir, filename_extended))
-
-        project_name = file_path.split(ls_project_dir)[-1]
-        print(os.path.join(project_name, filename_extended))
-        project.import_tasks(
-            [
-                {
-                    "text": "/data/local-files/?d=/label-studio/"
-                    + os.path.join(project_name, filename_extended)
-                }
-            ]
-        )
-
-    def import_dir(dir_to_import):
+    def import_dir(directory):
         c = 0
-        for file_name in os.listdir(dir_to_import):
-            file_path = os.path.join(dir_to_import, file_name)
-            if os.path.isdir(file_path) and recursive:
-                import_dir(file_path)
+        for file in os.scandir(directory):
+            if file.path.endswith(".htm") or file.path.endswith(".html"):
+                new_file_name = "_".join(file.path.split(SEPERATOR)[-2:])
 
-            elif file_name.endswith(".html") or file_name.endswith(".htm"):
-                import_to_ls(file_path)
+                shutil.copyfile(file.path, os.path.join(ls_project_dir, new_file_name))
+                shutil.copyfile(file.path, os.path.join(html_data_dir, new_file_name))
+                project.import_tasks(
+                    [
+                        {
+                            "text": "/data/local-files/?d=/label-studio/data/"
+                            + os.path.join(
+                                ls_project_dir.split(SEPERATOR)[-1], new_file_name
+                            )
+                        }
+                    ]
+                )
                 c += 1
                 if c == k and early_stop:
                     break
+
+            elif file.is_dir() and recursive:
+                import_dir(file.path)
 
     import_dir(data_dir)
