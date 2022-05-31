@@ -132,8 +132,15 @@ class Export:
             fonduer_doc_id = str(
                 session.query(Document.id).filter(Document.name == filename).first()[0]
             )
+            if not annotated_doc["data"].get("html"):
+                assert len(list(annotated_doc["data"].keys())) == 1
+                html_key = list(annotated_doc["data"].keys())[
+                    0
+                ]  # take the first key and assume the html is in there as value
+            else:
+                html_key = "html"
             tree = self._get_html_tree_from_string(
-                annotated_doc["data"]["text"]
+                annotated_doc["data"][html_key]
             )  # recreate html tree for doc
 
             for annotations in annotated_doc["annotations"]:

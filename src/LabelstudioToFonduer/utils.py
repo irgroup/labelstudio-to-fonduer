@@ -23,17 +23,15 @@ def determine_ngram_size(export, label):
 
 BASE_TEMPLATE = """
         <View>
-        <Relations>
-            <Relation value="org:founded_by"/>
-            <Relation value="org:founded"/>
-        </Relations>
-        <Labels name="label" toName="text">
-            
-            
-            
-        <Label value="Location" background="#FFA39E"/><Label value="Job" background="#04c317"/></Labels>
+            <HyperTextLabels name="ner" toName="text">
+                <Label value="Title" background="green"/>
+                <Label value="Author" background="blue"/>
+                <Label value="Body" background="yellow"/>
+            </HyperTextLabels>
 
-        <HyperText name="text" value="$text" valueType="url"/>
+            <View style="border: 1px solid #CCC; border-radius: 10px; padding: 5px">
+                <HyperText name="text" value="$html" valueType="url"/>
+            </View>
         </View>
         """
 
@@ -123,7 +121,7 @@ def import_data_to_ls(
                 project.import_tasks(
                     [
                         {
-                            "text": "/data/local-files/?d=/label-studio/data/"
+                            "html": "/data/local-files/?d=/label-studio/data/"  # depends on the Template and my break
                             + os.path.join(
                                 ls_project_dir.split(SEPERATOR)[-1], new_file_name
                             )
