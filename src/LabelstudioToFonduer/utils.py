@@ -14,10 +14,9 @@ def resolve_relations(relations, id_label):
 
 def determine_ngram_size(export, label):
     lengths = []
-    for doc in export:
-        for spot in doc["spots"]:
-            if spot["label"] == label:
-                lengths.append(len(spot.get("text").split(" ")))
+    for spot in export.spots.keys():
+        if export.spots[spot]["label"] == label:
+            lengths.append(len(export.spots[spot]["text"].split(" ")))
     return MentionNgrams(n_max=max(lengths), n_min=min(lengths))
 
 
@@ -115,6 +114,9 @@ def import_data_to_ls(
         for file in os.scandir(directory):
             if file.path.endswith(".htm") or file.path.endswith(".html"):
                 new_file_name = "_".join(file.path.split(SEPERATOR)[-2:])
+                new_file_name = new_file_name.replace("(", "").replace(")", "")
+                if file.path.endswith(".htm"):
+                    new_file_name += "l"
 
                 shutil.copyfile(file.path, os.path.join(ls_project_dir, new_file_name))
                 shutil.copyfile(file.path, os.path.join(html_data_dir, new_file_name))
