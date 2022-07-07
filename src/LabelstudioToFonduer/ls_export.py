@@ -2,7 +2,7 @@ import json
 import re
 import warnings
 import logging
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple, Optional
 import lxml
 
 import fonduer
@@ -52,7 +52,9 @@ class Export:
         html_string = BeautifulSoup(html_string, "html5lib")
         return etree.ElementTree(lxml.html.fromstring(str(html_string)))
 
-    def _get_absolute_xpath(self, relative_xpath: str, dom: etree._ElementTree) -> str:
+    def _get_absolute_xpath(
+        self, relative_xpath: str, dom: etree._ElementTree
+    ) -> Optional[str]:
         """Convert an relative XPATH string into an absolute one by searching the provided DOM object
         and returning the absolute XPATH of the found element.
 
@@ -195,12 +197,15 @@ class Export:
                             logging.warning(f'no xpath found - "{filename}"')
                             continue
 
+                        spot_text = entety["value"]["text"].replace("\\n", "").strip()
+
                         # print(xpath_abs)
                         fd_sentence_id = (
-                            session.query(Sentence.id)
+                            session.query(Sentence.id, Sentence.text)
                             .filter(
                                 Sentence.document_id == fonduer_doc_id,
                                 Sentence.xpath == xpath_abs,
+                                Sentence.text.contains(spot_text),
                             )
                             .all()
                         )
@@ -211,6 +216,7 @@ class Export:
                         id_label[ls_ID] = label
 
                         if not fd_sentence_id:
+                            logging.warning(f'No sentence found - "{filename}"')
                             # if label == "Title":
                             print(
                                 "| "
@@ -222,12 +228,13 @@ class Export:
                             continue
                         elif len(fd_sentence_id) > 1:
                             logging.warning(f'Multiple sentences found - "{filename}"')
+                            print(fd_sentence_id)
 
                         spots[ls_ID] = {
                             # "xpath_rel": xpath_rel,
                             "xpath_abs": xpath_abs,
                             "label": label,
-                            "text": entety["value"]["text"].replace("\\n", "").strip(),
+                            "text": spot_text,
                             "ls_ID": ls_ID,
                             "fd_sentence_id": str(fd_sentence_id[0][0]),
                             "filename": filename,
@@ -306,8 +313,8 @@ class Export:
             str(cand[0].document_id),
             str(cand[0].context.get_span()),
             str(cand[0].context.sentence.id),
-            # str(cand[0].context.char_start),
-            # str(cand[0].context.char_end + 1),
+            # str(cand[0].context.char_start + 1),
+            # str(cand[0].context.char_end + 2),
         )
         if canddidate_tuple in self.spots_table:
             return 1
