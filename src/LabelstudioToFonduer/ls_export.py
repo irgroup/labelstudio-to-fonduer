@@ -1,11 +1,19 @@
 import json
-from typing import Dict, List, Tuple, Set, Any
+import re
+import warnings
+import logging
+from typing import Any, Dict, List, Set, Tuple
+import lxml
 
-import fonduer  # type: ignore
+import fonduer
+from pandas import to_timedelta  # type: ignore
 import sqlalchemy
 from bs4 import BeautifulSoup
 from fonduer.parser.models import Document, Sentence
 from lxml import etree  # type: ignore
+
+# TBODY_REGEX = r"/tbody(\[\d+\])?"
+logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s", level="info")
 
 
 class Export:
@@ -27,7 +35,7 @@ class Export:
             str: Clean filename.
         """
         split = label_studio_str.split("-")  # strip id
-        full = "".join(split[1:])
+        full = "-".join(split[1:])
         split = full.split(".")
         result = "".join(split[:-1])
         return result
@@ -41,12 +49,10 @@ class Export:
         Returns:
             etree._ElementTree: Tree object for further use.
         """
-        soup = BeautifulSoup(html_string, features="lxml")
-        dom = etree.HTML(str(soup))
-        root = dom.getroottree()
-        return root
+        html_string = BeautifulSoup(html_string, "html5lib")
+        return etree.ElementTree(lxml.html.fromstring(str(html_string)))
 
-    def _get_absolute_xpath(self, rel_xpath: str, dom: etree._ElementTree) -> str:
+    def _get_absolute_xpath(self, relative_xpath: str, dom: etree._ElementTree) -> str:
         """Convert an relative XPATH string into an absolute one by searching the provided DOM object
         and returning the absolute XPATH of the found element.
 
@@ -57,8 +63,25 @@ class Export:
         Returns:
             str: Absolute XPATH to the relative XPATH.
         """
-        res = dom.xpath("/" + rel_xpath)[0]
-        return dom.getpath(res.getparent())
+        # The XPaths retrieved from Labes Studio contain 'tbody' elements, wich might not be in the actual HTMLs annotated. This is because the LS Frontend, as it is written in Java Script, operates on the DOM of the HTML, not the actual string and adds "missing" 'tbody' tags. To make use of the XPaths out of LS the additional 'tbody' elements are deleted from the XPath. Source: https://stackoverflow.com/questions/18241029/why-does-my-xpath-query-scraping-html-tables-only-work-in-firebug-but-not-the
+        # relative_xpath = re.sub(
+        #     TBODY_REGEX, "", relative_xpath
+        # )  # delete tbody elements
+        res = dom.xpath("/" + relative_xpath)
+        if not res:
+            return None
+        else:
+            res = res[0]
+        # print(res.getparent())
+        # print(dom.getpath(res.getparent()))
+        element = res.getparent()
+        if element.tail:
+            element = element.getparent()
+        xpath = dom.getpath(element)
+        xpath = xpath.replace("html[1]", "html")
+        if xpath.endswith("/span"):
+            xpath = xpath[:-5]
+        return xpath
 
     def _tabulate(self) -> List[Any]:
         """Generate a tabulated list of tuples of the relations. Each tuple is a relation consisting of
@@ -72,19 +95,23 @@ class Export:
         for relation in self.relations:
             entety_1 = self.spots.get(relation[0])
             entety_2 = self.spots.get(relation[1])
+            if (
+                entety_1 and entety_2
+            ) is None:  # ignoring files without xpath found (one is none)
+                continue
             assert entety_1["fonduer_doc_id"] == entety_2["fonduer_doc_id"]
             tabulated.append(
                 (
                     entety_1["fonduer_doc_id"],
                     entety_1["text"],
                     entety_1["fd_sentence_id"],
-                    entety_1["ls_spot_offsets"][0],
-                    entety_1["ls_spot_offsets"][1],
+                    # entety_1["ls_spot_offsets"][0],
+                    # entety_1["ls_spot_offsets"][1],
                     entety_2["fonduer_doc_id"],
                     entety_2["text"],
                     entety_2["fd_sentence_id"],
-                    entety_2["ls_spot_offsets"][0],
-                    entety_2["ls_spot_offsets"][1],
+                    # entety_2["ls_spot_offsets"][0],
+                    # entety_2["ls_spot_offsets"][1],
                 )
             )
         return tabulated
@@ -128,10 +155,21 @@ class Export:
             export = json.load(fin)
 
         for annotated_doc in export:
+
             filename = self._get_filename(annotated_doc["file_upload"])
-            fonduer_doc_id = str(
-                session.query(Document.id).filter(Document.name == filename).first()[0]
+
+            fonduer_doc_id_results = (
+                session.query(Document.id).filter(Document.name == filename).first()
             )
+            if fonduer_doc_id_results == None:
+                logging.warning(
+                    f'Annotated file "{filename}" could not be found in fonduer.'
+                )
+                continue
+
+            fonduer_doc_id = str(fonduer_doc_id_results[0])
+
+            # Depending on the template used in LS the key may vary.
             if not annotated_doc["data"].get("html"):
                 assert len(list(annotated_doc["data"].keys())) == 1
                 html_key = list(annotated_doc["data"].keys())[
@@ -139,36 +177,59 @@ class Export:
                 ]  # take the first key and assume the html is in there as value
             else:
                 html_key = "html"
+
             tree = self._get_html_tree_from_string(
                 annotated_doc["data"][html_key]
             )  # recreate html tree for doc
+            # self.tree = tree
 
             for annotations in annotated_doc["annotations"]:
-                if not annotations["result"]:
+                if not annotations["result"]:  # ignore files wich are not annotated
                     continue
                 for entety in annotations["result"]:
                     if entety.get("value"):
                         xpath_rel = entety["value"]["start"]
                         xpath_abs = self._get_absolute_xpath(xpath_rel, tree)
+
+                        if not xpath_abs:
+                            logging.warning(f'no xpath found - "{filename}"')
+                            continue
+
+                        # print(xpath_abs)
                         fd_sentence_id = (
                             session.query(Sentence.id)
                             .filter(
                                 Sentence.document_id == fonduer_doc_id,
                                 Sentence.xpath == xpath_abs,
                             )
-                            .first()
+                            .all()
                         )
-                        label = entety["value"]["labels"][0]
+
+                        # print(fd_sentence_id)
+                        label = entety["value"]["hypertextlabels"][0]
                         ls_ID = entety["id"]
                         id_label[ls_ID] = label
+
+                        if not fd_sentence_id:
+                            # if label == "Title":
+                            print(
+                                "| "
+                                + " | ".join(
+                                    [filename, entety["value"]["text"], xpath_abs]
+                                )
+                                + " |"
+                            )
+                            continue
+                        elif len(fd_sentence_id) > 1:
+                            logging.warning(f'Multiple sentences found - "{filename}"')
 
                         spots[ls_ID] = {
                             # "xpath_rel": xpath_rel,
                             "xpath_abs": xpath_abs,
                             "label": label,
-                            "text": entety["value"]["text"].replace("\\n", ""),
+                            "text": entety["value"]["text"].replace("\\n", "").strip(),
                             "ls_ID": ls_ID,
-                            "fd_sentence_id": str(fd_sentence_id[0]),
+                            "fd_sentence_id": str(fd_sentence_id[0][0]),
                             "filename": filename,
                             "fonduer_doc_id": fonduer_doc_id,
                             "ls_spot_offsets": (
@@ -176,10 +237,54 @@ class Export:
                                 str(entety["value"]["endOffset"]),
                             ),
                         }
+
                     else:
                         relations.append(
-                            (entety["from_id"], entety["to_id"], entety["labels"])
+                            (
+                                entety["from_id"],
+                                entety["to_id"],
+                                entety["hypertextlabels"],
+                            )
                         )
+
+        if not relations:
+            labels = []
+
+            # create label
+            for spot in spots.keys():
+                label = spots[spot]["label"]
+
+                if label not in labels:
+                    labels.append(label)
+
+            logging.warning("No relations described, adding annotations now.")
+            for annotated_doc in export:
+                for annotations in annotated_doc["annotations"]:
+                    if len(annotations["result"]) != 2:
+                        logging.warning(
+                            str(
+                                "Skipping document: "
+                                + str(annotated_doc["id"])
+                                + ". Not 2 annotations."
+                            )
+                        )
+                        continue
+
+                    if (
+                        annotations["result"][0]["value"]["hypertextlabels"][0]
+                        == labels[0]
+                    ):
+                        from_id = annotations["result"][1]["id"]
+                        to_id = annotations["result"][0]["id"]
+                    elif (
+                        annotations["result"][1]["value"]["hypertextlabels"][0]
+                        == labels[0]
+                    ):
+                        from_id = annotations["result"][0]["id"]
+                        to_id = annotations["result"][1]["id"]
+
+                    relations.append((from_id, to_id, None))
+
         return spots, relations, id_label
 
     # def is_gold(self, cand: fonduer.candidates.models.Candidate) -> int:
@@ -196,13 +301,13 @@ class Export:
             str(cand[1].document_id),
             str(cand[1].context.get_span()),
             str(cand[1].context.sentence.id),
-            str(cand[1].context.char_start),
-            str(cand[1].context.char_end + 1),
+            # str(cand[1].context.char_start),
+            # str(cand[1].context.char_end + 1),
             str(cand[0].document_id),
             str(cand[0].context.get_span()),
             str(cand[0].context.sentence.id),
-            str(cand[0].context.char_start),
-            str(cand[0].context.char_end + 1),
+            # str(cand[0].context.char_start),
+            # str(cand[0].context.char_end + 1),
         )
         if canddidate_tuple in self.spots_table:
             return 1
