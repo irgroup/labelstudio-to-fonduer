@@ -199,16 +199,32 @@ class Export:
 
                         spot_text = entety["value"]["text"].replace("\\n", "").strip()
 
-                        # print(xpath_abs)
                         fd_sentence_id = (
                             session.query(Sentence.id, Sentence.text)
                             .filter(
                                 Sentence.document_id == fonduer_doc_id,
                                 Sentence.xpath == xpath_abs,
-                                Sentence.text.contains(spot_text),
                             )
                             .all()
                         )
+
+                        if (
+                            len(fd_sentence_id) > 1
+                        ):  # add exact text to query if more resuts then 1
+                            logging.warning(
+                                f'Multiple sentences found - "{filename}", expanding query'
+                                + str(fd_sentence_id),
+                            )
+
+                            fd_sentence_id = (
+                                session.query(Sentence.id, Sentence.text)
+                                .filter(
+                                    Sentence.document_id == fonduer_doc_id,
+                                    Sentence.xpath == xpath_abs,
+                                    Sentence.text.contains(spot_text),
+                                )
+                                .all()
+                            )
 
                         # print(fd_sentence_id)
                         label = entety["value"]["hypertextlabels"][0]
@@ -216,19 +232,18 @@ class Export:
                         id_label[ls_ID] = label
 
                         if not fd_sentence_id:
-                            logging.warning(f'No sentence found - "{filename}"')
-                            # if label == "Title":
-                            print(
-                                "| "
-                                + " | ".join(
-                                    [filename, entety["value"]["text"], xpath_abs]
-                                )
-                                + " |"
+                            logging.warning(
+                                f'No sentence found - "{filename}", Text: "{spot_text}", DocID: "{fonduer_doc_id}"'
                             )
+                            # if label == "Title":
+                            # print(
+                            #     "| "
+                            #     + " | ".join(
+                            #         [filename, entety["value"]["text"], xpath_abs]
+                            #     )
+                            #     + " |"
+                            # )
                             continue
-                        elif len(fd_sentence_id) > 1:
-                            logging.warning(f'Multiple sentences found - "{filename}"')
-                            print(fd_sentence_id)
 
                         spots[ls_ID] = {
                             # "xpath_rel": xpath_rel,
