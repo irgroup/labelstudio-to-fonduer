@@ -174,6 +174,11 @@ class Export_Document:
         html_key = list(export["data"].keys())[0]
         html_string = export["data"][html_key]
 
+        pattern = re.compile(
+            "[\u2010\u2011\u2012\u2013\u2014\u2212\ufeff]", flags=re.UNICODE
+        )
+        html_string = re.sub(pattern, " ", html_string)
+
         html_string = re.sub(r"(\w)\s\s+(\w)", r"\g<1> \g<2>", html_string)
 
         html_string = BeautifulSoup(html_string, "html5lib")
@@ -329,7 +334,8 @@ class Export:
             entety_1_stop = document.entetys[0].end_offset
             entety_2_start = document.entetys[1].start_offset
             entety_2_stop = document.entetys[1].end_offset
-
+            if not relevant_candidates:
+                logging.warning(f'No offset candidates found: "{document.filename}"')
             table = []
             for candidate in relevant_candidates:
                 candidate_row = (
@@ -343,11 +349,11 @@ class Export:
                 if candidate_row not in self.gold_table:
                     continue
 
-                distance = abs(
-                    (entety_1_start - candidate[0].context.char_start)
-                    + (entety_1_stop - candidate[0].context.char_end + 1)
-                    + (entety_2_start - candidate[1].context.char_start)
-                    + (entety_2_stop - candidate[1].context.char_end + 1)
+                distance = (
+                    abs(entety_1_start - candidate[0].context.char_start)
+                    + abs(entety_1_stop - candidate[0].context.char_end + 1)
+                    + abs(entety_2_start - candidate[1].context.char_start)
+                    + abs(entety_2_stop - candidate[1].context.char_end + 1)
                 )
                 table.append((candidate.id, distance))
 

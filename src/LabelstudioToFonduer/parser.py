@@ -256,7 +256,8 @@ class ModifiedSpacyParser(LingualParser):
 
         # Create sentences simply on points only but obey given exceptions
         # sentences = text.split(".")
-        sentences = re.split(self.split_pattern, text)
+
+        sentences = list(filter(None, re.split(self.split_pattern, text)))
 
         for sent in sentences:
             parts: Dict[str, Any] = defaultdict(list)
