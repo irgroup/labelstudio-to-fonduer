@@ -41,7 +41,7 @@ class FonduerToLabelStudio:
     def make_type(self, FD_type: str) -> str:
         return FD_type[0].upper() + FD_type[1:]
 
-    def seriealize_candidate(self, relation):
+    def seriealize_relation(self, relation):
         def calculate_offset_plus(FD_span, html_string, xpath, offset_start):
             dom = lxml.etree.ElementTree(lxml.html.fromstring(html_string))
             results = dom.xpath(xpath)
@@ -65,10 +65,20 @@ class FonduerToLabelStudio:
 
         html_document = relation.document.text
 
-        version = "fonduer"
         score = 0.90
 
         results = []
+        # add relation
+        results.append(
+            {
+                "from_id": relation[0].id,
+                "to_id": relation[1].id,
+                "type": "relation",
+                "direction": "right",
+            }
+        )
+
+        # add entetys
         for entity in relation:
             span_mention = entity[0]
 
@@ -111,19 +121,27 @@ class FonduerToLabelStudio:
             }
             results.append(result)
 
-        return {
-            "data": {"text": html_document},
-            "annotations": [],
-            "predictions": [{"model_version": version, "score": score, "result": results}],
-        }
+        return results
 
     def create_import(self, candidates: List[Any], fonduer_export_path: str) -> str:
-        label_studio_import = []
 
+        documents = {}
         # serialize all candidates
-        for candidate in candidates[0]:
-            serialized = self.seriealize_candidate(candidate)
-            label_studio_import.append(serialized)
+        for relation in candidates[0]:
+            if relation.document.name not in documents:
+                documents[relation.document.name] = {
+                    "id": relation.document.name,
+                    "data": {
+                        "text": relation.document.text,
+                    },
+                    "predictions": [{"model_version": 0, "score": 0, "result": []}],
+                }
+
+            documents[relation.document.name]["predictions"][0]["result"].extend(
+                self.seriealize_relation(relation)
+            )
+
+            label_studio_import = list(documents.values())
 
         # write tasks
         with open(fonduer_export_path, "w") as file:
