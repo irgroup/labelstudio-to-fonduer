@@ -137,7 +137,7 @@ class ModifiedSpacyParser(LingualParser):
             sentences, self.model.max_length
         )
 
-        # TODO: We could do this in parallel. Test speedup in the future
+        # We could do this in parallel. Test speedup in the future
         for sentence_batch in sentence_batches:
             custom_tokenizer = TokenPreservingTokenizer(self.model.vocab)
             # we circumvent redundant tokenization by using a custom
