@@ -2,7 +2,8 @@
 """Convert Fonduer candidates to Label Studio annotations."""
 
 import json
-from typing import Any, Dict, List, Union
+import re
+from typing import Any, Dict, List, Tuple, Union
 
 import lxml.etree
 
@@ -17,7 +18,7 @@ def log_offset(span, html_document, offset_start, offset_end, offset_plus, xpath
     results = dom.xpath(xpath_start)
 
     if results:
-        HTML_span = results[0].text_content()
+        html_span = results[0].text_content()
 
         print(f"XPath:\t{xpath_start}")
 
@@ -26,17 +27,35 @@ def log_offset(span, html_document, offset_start, offset_end, offset_plus, xpath
         )
         print(f"Plus:\t{offset_plus}")
         print("Span:\t" + span)
-        print(f"Raw:\t{repr(HTML_span)}")
-        print(f"Marked:\t{green(HTML_span, offset_start, offset_end)}\n")
+        print(f"Raw:\t{repr(html_span)}")
+        print(f"Marked:\t{green(html_span, offset_start, offset_end)}\n")
 
     else:
         print("ERROR: no span found from XPath")
 
 
+def get_offsets(span: str, sentence: str) -> List[Tuple[int, int]]:
+    """Get all occurences of a span in a sentence and return the offset
+
+    Args:
+        span (str): Span to be matched.
+        sentence (str): Sentence to be searched.
+
+    Returns:
+        List[Tuple[int, int]]: List of offsets.
+    """
+    span_escaped = re.escape(span)
+    result = re.finditer(span_escaped, sentence)
+    offsets = []
+    for match in result:
+        offsets.append((match.start(), match.end()))
+    return offsets
+
+
 class FonduerToLabelStudio:
     """Transfere Fonduer candidates to Label Studio Labes."""
 
-    def seriealize_relation(self, relation: Any) -> List[Dict[str, Any]]:
+    def seriealize_relation(self, relation: Any, confidence: float = 0.00) -> List[Dict[str, Any]]:
         """Serialize a Fonduer candidate relation into a Label Studio annotated relation of entities.
 
         The Fonduer candidate is parsed and modified to create a Label Studio annotation from it.
@@ -45,24 +64,25 @@ class FonduerToLabelStudio:
 
         Args:
             relation (Any): Fonduer candidate relation.
+            confidence (Float): confidence score of the relation. Defaults to 0.00.
 
         Returns:
             List[Dict[str, Any]]: List of serialized relations and entities.
         """
 
         def calculate_offset_plus(
-            FD_span: str, html_string: str, xpath: str, offset_start: int
+            fd_span: str, html_string: str, xpath: str, offset_start: int
         ) -> int:
             """Calculate addititional offset from the html element.
 
             Fondue calculates the offset based on the sentence only. If the HTML element located by
             the XPath may contain further sentences and the HTML tag may also contain training
-             whitespaces, an additional offset may be needed.
+            whitespaces, an additional offset may be needed.
             This offset is calculated by searching the Fonduer Span in the HTML element and
             subtracting the offset from fonuer.
 
             Args:
-                FD_span (str): Text of the entity from Fonduer.
+                fd_span (str): Text of the entity from Fonduer.
                 html_string (str): Full HTML string to construct the DOM and search the XPath.
                 xpath (str): XPath to the HTML element with the span init.
                 offset_start (int): Fonduer offset.
@@ -77,10 +97,25 @@ class FonduerToLabelStudio:
                 print("ERROR: more than one result")
 
             if results:
-                HTML_span = results[0].text_content()
+                html_span = results[0].text_content()
 
-                # TODO: What if the span is multiple times in the context.
-                offset_plus = HTML_span.find(FD_span)  # Search for the FD span in the LS span
+                # offset_plus = html_span.find(fd_span)  # Search for the FD span in the LS span
+
+                # if string is multiple times in the context, the occurence with the closest offset
+                # to the offset from Fonduer is used
+                matches = get_offsets(fd_span, html_span)
+
+                if len(matches) > 1:
+                    candidates = []
+                    for candidate in matches:
+                        candidates.append(abs(candidate[0] - offset_start))
+                    index = candidates.index(min(candidates))
+                    offset_plus = matches[index][0]
+                elif len(matches) == 1:
+                    offset_plus = matches[0][0]
+
+                elif len(matches) == 0:
+                    raise ValueError("Span not found in sentence")
 
                 if offset_plus < 1:
                     print("ERROR: offset_plus < 1")
@@ -91,11 +126,8 @@ class FonduerToLabelStudio:
                 print("ERROR: no span found from XPath")
                 return 0
 
+        # html text
         html_document = relation.document.text
-
-        # TODO: Make confidence score accessible from the outside
-        score = 0.90
-
         results = []
 
         # add relation
@@ -139,7 +171,7 @@ class FonduerToLabelStudio:
                 "type": "hypertextlabels",
                 "readonly": False,
                 "hidden": False,
-                "score": score,
+                "score": confidence,
                 "value": {
                     "start": xpath_start.replace("/html/body", ""),
                     "end": xpath_end.replace("/html/body", ""),
