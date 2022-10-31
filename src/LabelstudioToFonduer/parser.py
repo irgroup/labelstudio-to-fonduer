@@ -1,5 +1,5 @@
 """Modified Fonduer Spacy parser. Please see: https://github.com/HazyResearch/fonduer/blob/master/src/fonduer/parser/lingual_parser/spacy_parser.py for the original work.
-
+TODO: improve citation
 The `split_sentences` function is modified to split sentences only on `.` chars but obey exceptions.
 """
 import re
@@ -106,9 +106,7 @@ class ModifiedSpacyParser(LingualParser):
             model = language_method()
         self.model = model
 
-    def enrich_sentences_with_NLP(
-        self, sentences: Collection[Sentence]
-    ) -> Iterator[Sentence]:
+    def enrich_sentences_with_NLP(self, sentences: Collection[Sentence]) -> Iterator[Sentence]:
         """Enrich a list of fonduer Sentence objects with NLP features.
 
         We merge and process the text of all Sentences for higher efficiency.
@@ -133,9 +131,7 @@ class ModifiedSpacyParser(LingualParser):
 
         if self.model.has_pipe("sentence_boundary_detector"):
             self.model.remove_pipe(name="sentence_boundary_detector")
-        self.model.add_pipe(
-            set_custom_boundary, before="parser", name="sentence_boundary_detector"
-        )
+        self.model.add_pipe(set_custom_boundary, before="parser", name="sentence_boundary_detector")
 
         sentence_batches: List[List[Sentence]] = self._split_sentences_by_char_limit(
             sentences, self.model.max_length
@@ -163,12 +159,8 @@ class ModifiedSpacyParser(LingualParser):
                 for i, token in enumerate(sent):
                     parts["lemmas"].append(token.lemma_)
                     parts["pos_tags"].append(token.tag_)
-                    parts["ner_tags"].append(
-                        token.ent_type_ if token.ent_type_ else "O"
-                    )
-                    head_idx = (
-                        0 if token.head is token else token.head.i - sent[0].i + 1
-                    )
+                    parts["ner_tags"].append(token.ent_type_ if token.ent_type_ else "O")
+                    head_idx = 0 if token.head is token else token.head.i - sent[0].i + 1
                     parts["dep_parents"].append(head_idx)
                     parts["dep_labels"].append(token.dep_)
                 # Special case as Japanese model does not have "tagger" in pipeline
@@ -245,8 +237,7 @@ class ModifiedSpacyParser(LingualParser):
             doc = self.model(text, disable=["parser", "tagger", "ner"])
             self.model.max_length = previous_max_length
             logger.warning(
-                f"Spacy maximum "
-                f"character limit set back to {self.model.max_length}."
+                f"Spacy maximum " f"character limit set back to {self.model.max_length}."
             )
         except Exception as e:
             logger.exception(e)
@@ -281,9 +272,7 @@ class ModifiedSpacyParser(LingualParser):
                 parts["dep_labels"].append("")  # placeholder for later NLP parsing
 
             # make char_offsets relative to start of sentence
-            parts["char_offsets"] = [
-                p - parts["char_offsets"][0] for p in parts["char_offsets"]
-            ]
+            parts["char_offsets"] = [p - parts["char_offsets"][0] for p in parts["char_offsets"]]
             parts["position"] = position
             parts["text"] = sent.text
 
@@ -345,17 +334,12 @@ class TokenPreservingTokenizer(object):
                 spaces_list = [True] * len(words_in_sentence)
                 # Last word in sentence always assumed to be followed by space
                 for i, word in enumerate(words_in_sentence[:-1]):
-                    current_sentence_pos = sentence.text.find(
-                        word, current_sentence_pos
-                    )
+                    current_sentence_pos = sentence.text.find(word, current_sentence_pos)
                     if current_sentence_pos == -1:
-                        raise AttributeError(
-                            "Could not find token in its parent sentence"
-                        )
+                        raise AttributeError("Could not find token in its parent sentence")
                     current_sentence_pos += len(word)
                     if not any(
-                        sentence.text[current_sentence_pos:].startswith(s)
-                        for s in whitespace
+                        sentence.text[current_sentence_pos:].startswith(s) for s in whitespace
                     ):
                         spaces_list[i] = False
                 all_spaces += spaces_list

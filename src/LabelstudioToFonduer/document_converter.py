@@ -49,7 +49,8 @@ class DocumentConverter:
                 self.convert_one(file_path, output_path)
 
         # Is file
-        elif os.path.isfile(input_):
+        elif os.path.isfile(input_) and input_.endswith(".html"):
             self.convert_one(input_, output_path)
 
-        # TODO: rais file error if not supported
+        elif not os.path.exists(input_):
+            raise FileNotFoundError(f"File or directory {input_} does not exist.")
