@@ -3,7 +3,6 @@
 during the process. This is crucial to reliably map the annotations back to the original documents.
 """
 import html
-import logging
 
 import os
 import shutil
@@ -20,6 +19,7 @@ from fonduer.parser.models import Document
 from label_studio_sdk import Client
 
 from .util import init_logger
+from .fonduer_tools import save_create_project
 from LabelstudioToFonduer.document_processor import My_HTMLDocPreprocessor
 
 
@@ -115,7 +115,7 @@ class DocumentConverter:
 class ConversionChecker:
     """Compare the different representations Label Studio and Fonduer may create from the same HTML
     document. This is useful to check if the conversion of the document is correct. The document is
-    first converted to a format that is natively supported by Fonduer. Then, the document is imported
+    first converted to a format that is natively supportecomputerd by Fonduer. Then, the document is imported
     into Label Studio and Fonduer. The HTML representation of the document in Label Studio and
     Fonduer is compared. If the HTML representations are the same, the conversion was successful.
     """
@@ -147,44 +147,15 @@ class ConversionChecker:
         """
 
     def process_fonduer(self, docs_path: str):
-        def _wipe_db():
-            """Wipe the Fonduer database."""
-            engine = sqlalchemy.create_engine(self.fonduer_postgres_url)
-            conn = engine.connect()
-            conn.execute("commit")
-            conn.execute(
-                f"""SELECT 
-                pg_terminate_backend(pid) 
-            FROM 
-                pg_stat_activity 
-            WHERE 
-                -- don't kill my own connection!
-                pid <> pg_backend_pid()
-                -- don't kill the connections to other databases
-                AND datname = '{self.project_name}'
-                ;"""
-            )
+        """Process pipeline for Fonduer.
 
-            conn.execute("commit")
-            conn.execute("drop database " + self.project_name)
+        Import a given document to Fonduer and export the documents back to the computer to
+        compare the results and investigate any changes that might have occured.
 
-        def _clean_db():
-            """Clean the Fonduer database and create a new database for the comparision."""
-            current_dbs = engine.execute("SELECT datname FROM pg_database;").fetchall()
-            current_dbs = [db[0] for db in current_dbs]
-
-            if self.project_name in current_dbs:
-                _wipe_db()
-            conn.execute("commit")
-            conn.execute("create database " + self.project_name)
-            conn.close()
-
-        # setup DB
-        engine = sqlalchemy.create_engine(self.fonduer_postgres_url)
-        conn = engine.connect()
-
-        # clean DB
-        _clean_db()
+        Args:
+            docs_path (str): Path to the documents.
+        """
+        save_create_project(self.fonduer_postgres_url, self.project_name)
 
         # setup Fonduer
         session = Meta.init(self.fonduer_postgres_url + self.project_name).Session()
@@ -309,8 +280,6 @@ class ConversionChecker:
         original_html = load_html("ORIGINAL", docs_path)
 
         # Compare
-        logging.getLogger("fonduer").disabled = True
-        print(logging)
         if original_html == label_studio_html:
             print("✓ Label Studio has not changed the HTML.")
             logger.info("✓ Label Studio has not changed the HTML.")

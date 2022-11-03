@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 *    Title: Fonduer: Knowledge Base Construction from Richly Formatted Data
 *    Author: Wu, Sen and Hsiao, Luke and Cheng, Xiao and Hancock, Braden and Rekatsinas, Theodoros 

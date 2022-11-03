@@ -6,32 +6,9 @@ import re
 from typing import Any, Dict, List, Tuple, Union
 
 import lxml.etree
+from .util import init_logger, highlight_span
 
-
-def green(text, from_, to):
-    text_highlight = text[:from_] + "\x1b[6;30;42m" + text[from_:to] + "\x1b[0m" + text[to:]
-    return text_highlight
-
-
-def log_offset(span, html_document, offset_start, offset_end, offset_plus, xpath_start):
-    dom = lxml.etree.ElementTree(lxml.html.fromstring(html_document))
-    results = dom.xpath(xpath_start)
-
-    if results:
-        html_span = results[0].text_content()
-
-        print(f"XPath:\t{xpath_start}")
-
-        print(
-            f"Offset:\toffset_start: {offset_start-offset_plus} offset_end: {offset_end-offset_plus}"
-        )
-        print(f"Plus:\t{offset_plus}")
-        print("Span:\t" + span)
-        print(f"Raw:\t{repr(html_span)}")
-        print(f"Marked:\t{green(html_span, offset_start, offset_end)}\n")
-
-    else:
-        print("ERROR: no span found from XPath")
+logger = init_logger(__name__)
 
 
 def get_offsets(span: str, sentence: str) -> List[Tuple[int, int]]:
@@ -94,7 +71,9 @@ class FonduerToLabelStudio:
             results = dom.xpath(xpath)
 
             if len(results) > 1:
-                print("ERROR: more than one result")
+                logger.warning(
+                    "More than one element found for XPath: '%s'. Using first element.", xpath
+                )
 
             if results:
                 html_span = results[0].text_content()
@@ -115,12 +94,12 @@ class FonduerToLabelStudio:
                     raise ValueError("Span not found in sentence")
 
                 if offset_plus < 1:
-                    print("ERROR: offset_plus < 1")
+                    logger.warning("Offset is smaller than 1")
                     return 0
                 return offset_plus - offset_start
 
             else:
-                print("ERROR: no span found from XPath")
+                logger.warning("No span found from XPath")
                 return 0
 
         # html text
@@ -157,9 +136,27 @@ class FonduerToLabelStudio:
             offset_start = span_mention.char_start + offset_plus
             offset_end = span_mention.char_end + offset_plus + 1
 
-            # TODO: improve logging
-            if True:
-                log_offset(text, html_document, offset_start, offset_end, offset_plus, xpath_start)
+            # Logging
+            dom = lxml.etree.ElementTree(lxml.html.fromstring(html_document))
+            results = dom.xpath(xpath_start)
+            name = relation.document.name
+
+            if results:
+                html_span = results[0].text_content()  # type: ignore
+
+                logger.info(f"Doc: '{name}' XPath: '{xpath_start}'")
+                logger.info(
+                    f"Doc: '{name}' Offset_start: '{offset_start-offset_plus}' Offset_end: '{offset_end-offset_plus}'"
+                )
+                logger.info(f"Doc: '{name}' Plus: '{offset_plus}'")
+                logger.info(f"Doc: '{name}' Span: '{name}'")
+                logger.info(f"Doc: '{name}' Raw: '{repr(html_span)}'")
+                logger.info(
+                    f"Doc: '{name}' Marked: '{highlight_span(html_span, offset_start, offset_end)}'"
+                )
+
+            else:
+                logger.warning(f"Doc: '{name}' No span found from XPath")
 
             result = {
                 "id": entity.id,

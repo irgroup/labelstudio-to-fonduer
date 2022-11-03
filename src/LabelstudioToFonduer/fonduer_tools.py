@@ -1,8 +1,27 @@
+# -*- coding: utf-8 -*-
+"""Helpfull tools to use fonduer."""
+
 import sqlalchemy
 
 
 def save_create_project(conn_string: str, project_name: str):
-    def _wipe_db():
+    """Cleanup the Fonduer database and create a new project in the database.
+
+    Args:
+        conn_string (str): Fonduer postgres connection string.
+        project_name (str): Fonduer project name.
+    """
+    # create connection
+    engine = sqlalchemy.create_engine(conn_string)
+    conn = engine.connect()
+    conn.execute("commit")
+
+    # Check existing projects
+    current_dbs = engine.execute("SELECT datname FROM pg_database;").fetchall()
+    current_dbs = [db[0] for db in current_dbs]
+
+    # Wipe if project exists
+    if project_name in current_dbs:
         engine = sqlalchemy.create_engine(conn_string)
         conn = engine.connect()
         conn.execute("commit")
@@ -21,19 +40,6 @@ def save_create_project(conn_string: str, project_name: str):
 
         conn.execute("commit")
         conn.execute("drop database " + project_name)
-
-    # create connection
-    engine = sqlalchemy.create_engine(conn_string)
-    conn = engine.connect()
-    conn.execute("commit")
-
-    # Check existing projects
-    current_dbs = engine.execute("SELECT datname FROM pg_database;").fetchall()
-    current_dbs = [db[0] for db in current_dbs]
-
-    # Wipe if project exists
-    if project_name in current_dbs:
-        _wipe_db()
 
     # Create Project
     conn.execute("commit")

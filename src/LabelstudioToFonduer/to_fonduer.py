@@ -10,6 +10,9 @@ import pandas as pd
 import sqlalchemy
 from fonduer.parser.models import Document, Sentence
 
+from .util import init_logger
+
+logger = init_logger(__name__)
 
 # Data model
 class LabelStudioEntiti:
@@ -258,10 +261,10 @@ class LabelStudioToFonduer:
             .all()
         )
         if len(document_id) > 1:
-            print(f'ERROR "{entity.filename}": Document_id is ambiguous.')
+            logger.warning(f"Doc: '{entity.filename}' Document ID: '{document_id}' is not unique.")
             return False
         elif len(document_id) == 0:
-            print(f'ERROR "{entity.filename}": no Document_id found.')
+            logger.warning(f"Doc: '{entity.filename}' Document ID: '{document_id}' not found.")
             return False
         else:
             return document_id[0][0]
@@ -331,8 +334,8 @@ class LabelStudioToFonduer:
                     .filter(Document.stable_id == document_id)
                     .first()[0]
                 )
-                print(
-                    f'ERROR "{document_name}": absolute XPath could not retrieved: Fonuer Document ID: "{document_id}".'
+                logger.warning(
+                    f"Doc: '{document_name}' Fonduer Doc ID: '{document_id}': absolute XPath could not retrieved."
                 )
                 return None
 
@@ -356,12 +359,12 @@ class LabelStudioToFonduer:
                 .filter(Document.stable_id == document_id)
                 .first()[0]
             )
-            print(
-                f'ERROR "{document_name}": XPath not in fonduer database: XPath: "{absolute_xpath}", Text: "{entity.text}", Fonuer Document ID: "{document_id}".'
+            logger.warning(
+                f"Doc: '{document_name}': XPath not in fonduer database: XPath: '{absolute_xpath}', Text: '{entity.text}', Fonuer Document ID: '{document_id}'."
             )
             return None
         elif len(candidates) > 1:
-            print(f'ERROR "{document_name}": Multiple candidates found.')
+            logger.warning(f"Doc: '{document_name}': Multiple candidates found.")
             return None
         else:
             # Offset start, offset stop, sentence id
@@ -395,7 +398,9 @@ class LabelStudioToFonduer:
         for document in self.label_studio_export.documents:
             # exclude maleformed or incomplete documents
             if len(document.entities) != 2:
-                print(f'ERROR "{document.filename}": Skipping document, not exactly 2 entities.')
+                logger.warning(
+                    f"Doc: '{document.filename}': Skip doc, it has not exactly two entities."
+                )
                 continue
 
             # Create entity dict
@@ -403,7 +408,9 @@ class LabelStudioToFonduer:
             for entity in document.entities:
                 feature = get_features(entity)
                 if not all(feature):
-                    print(f'ERROR "{document.filename}": Skipping entity, not all features set.')
+                    logger.warning(
+                        f"Doc:  '{document.filename}': Skipping entity, not all features set."
+                    )
                     continue
                 else:
                     features[entity.label.lower()] = feature
@@ -418,9 +425,11 @@ class LabelStudioToFonduer:
                 ):
                     gold_table.append(features)
                 else:
-                    print(f'ERROR "{document.filename}": Feature document IDs not matching.')
+                    logger.warning(
+                        f"Doc: '{document.filename}': Feature document IDs not matching."
+                    )
             else:
-                print(f'ERROR "{document.filename}": not parsable.')
+                logger.warning(f"Doc: '{document.filename}': Not parsable.")
 
         return gold_table
 
