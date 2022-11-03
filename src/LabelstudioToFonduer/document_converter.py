@@ -88,7 +88,205 @@ class DocumentConverter:
         elif not os.path.exists(input_):
             raise FileNotFoundError(f"File or directory {input_} does not exist.")
 
-    @staticmethod
-    def check_conversion():
-        pass
-        # TODO: implement Conversion checker
+
+import requests
+from label_studio_sdk import Client
+import label_studio_sdk
+from LabelstudioToFonduer.document_processor import My_HTMLDocPreprocessor
+import os
+import sys
+import logging
+import sqlalchemy
+from typing import Iterator
+
+from bs4 import BeautifulSoup
+from fonduer import Meta, init_logging
+from fonduer.parser.preprocessors import HTMLDocPreprocessor
+from fonduer.parser.preprocessors.doc_preprocessor import DocPreprocessor
+
+from fonduer.parser import Parser
+from fonduer.parser.models import Document, Sentence
+
+import html
+import shutil
+
+
+class ConversionChecker:
+    def __init__(
+        self,
+        label_studio_url: str,
+        label_studio_api_key: str,
+        fonduer_postgres_url: str,
+        project_name: str = "tmp",
+        paralel: int = 4,
+    ) -> None:
+        self.label_studio_url = label_studio_url
+        self.label_studio_api_key = label_studio_api_key
+        self.paralel = paralel
+        self.fonduer_postgres_url = fonduer_postgres_url
+        self.project_name = project_name
+        self.labeling_config = """
+        <View>
+        <HyperTextLabels name="ner" toName="text">
+            <Label value="Job" background="green"/>
+            <Label value="City" background="blue"/>
+        </HyperTextLabels>
+
+        <View style="border: 1px solid #CCC;                border-radius: 10px;                padding: 5px">
+            <HyperText name="text" value="$html" valueType="text" inline="true"/>
+        </View>
+        </View>
+        """
+
+    def process_fonduer(self, docs_path: str):
+        def _wipe_db():
+            engine = sqlalchemy.create_engine(self.fonduer_postgres_url)
+            conn = engine.connect()
+            conn.execute("commit")
+            conn.execute(
+                f"""SELECT 
+                pg_terminate_backend(pid) 
+            FROM 
+                pg_stat_activity 
+            WHERE 
+                -- don't kill my own connection!
+                pid <> pg_backend_pid()
+                -- don't kill the connections to other databases
+                AND datname = '{self.project_name}'
+                ;"""
+            )
+
+            conn.execute("commit")
+            conn.execute("drop database " + self.project_name)
+
+        def _clean_db():
+            current_dbs = engine.execute("SELECT datname FROM pg_database;").fetchall()
+            current_dbs = [db[0] for db in current_dbs]
+
+            if self.project_name in current_dbs:
+                _wipe_db()
+            conn.execute("commit")
+            conn.execute("create database " + self.project_name)
+            conn.close()
+
+        # setup DB
+        engine = sqlalchemy.create_engine(self.fonduer_postgres_url)
+        conn = engine.connect()
+
+        # clean DB
+        _clean_db()
+
+        # setup Fonduer
+        init_logging(log_dir="logs")
+        session = Meta.init(self.fonduer_postgres_url + self.project_name).Session()
+        doc_preprocessor = My_HTMLDocPreprocessor(docs_path, max_docs=100)
+
+        # Import Document
+        corpus_parser = Parser(session, structural=True, lingual=True, flatten=[])
+        corpus_parser.apply(doc_preprocessor, parallelism=self.paralel)
+        assert session.query(Document).count() == 1
+
+        # Export parsed document
+        documents = session.query(Document).all()
+        assert len(documents) == 1
+        html_str = documents[0].text
+        filename = documents[0].name
+
+        # FIX unescape at export level
+        html_str = html.unescape(html_str)
+
+        with open(
+            os.path.join(docs_path, filename.replace("ORIGINAL_", "FONDUER_") + ".html"), "w"
+        ) as file:
+            file.write(html_str)
+
+    def process_label_studio(self, docs_path: str):
+        def delete_all_tasks(project: label_studio_sdk.Project):
+            r = requests.delete(
+                self.label_studio_url + f"/api/projects/{project.id}/tasks/",
+                headers={"Authorization": "Token " + self.label_studio_api_key},
+            )
+            assert r.status_code == 204
+
+        # Connect to the Label Studio API and check the connection
+        ls = Client(url=self.label_studio_url, api_key=self.label_studio_api_key)
+        assert ls.check_connection().get("status") == "UP"
+
+        # setup project
+        projects = {project.get_params()["title"]: project.id for project in ls.list_projects()}
+        if self.project_name not in projects:
+            project = ls.start_project(title=self.project_name, label_config=self.labeling_config)
+        else:
+            project = ls.get_project(projects[self.project_name])
+            delete_all_tasks(project)
+
+        # load file
+        files = os.listdir(docs_path)
+        assert len(files) == 2
+        for file_name in files:
+            if file_name.startswith("ORIGINAL"):
+                break
+        with open(os.path.join(docs_path, file_name), "r") as file:
+            html = file.read()
+
+        # import html as task
+        project.import_tasks(
+            [
+                {"html": html, "meta_info": {"file_name": file_name}},
+            ]
+        )
+
+        # export html
+        tasks = project.get_tasks()
+        assert len(tasks) == 1
+
+        tasks[0]["data"].keys()
+
+        with open(
+            os.path.join(docs_path, file_name.replace("ORIGINAL_", "LABEL-STUDIO_") + ".html"), "w"
+        ) as file:
+            file.write(html)
+
+    def check(self, docs_path):
+        def load_html(prefix, docs_path):
+            file_names = os.listdir(docs_path)
+            assert file_names
+            for file_name in file_names:
+                if file_name.startswith(prefix):
+                    break
+            with open(os.path.join(docs_path, file_name)) as file:
+                html_document = file.read()
+            return html_document
+
+        os.mkdir(self.project_name)
+
+        # copy documents to path
+        for file_name in os.listdir(docs_path):
+            # construct full file path
+            source = os.path.join(docs_path, file_name)
+            destination = os.path.join(self.project_name, file_name)
+            # copy only files
+            if os.path.isfile(source):
+                shutil.copy(source, destination)
+
+        # Import into systems
+        self.process_fonduer(self.project_name)
+        self.process_label_studio(self.project_name)
+
+        # Load exports
+        fonduer_html = load_html("FONDUER", docs_path)
+        label_studio_html = load_html("LABEL-STUDIO", docs_path)
+        original_html = load_html("ORIGINAL", docs_path)
+
+        # Compare
+        if original_html == label_studio_html:
+            print("Label Studio has not changed the HTML")
+        else:
+            print("Label Studio has changed the HTML")
+        if fonduer_html == original_html:
+            print("Fonduer has not changed the HTML")
+        else:
+            print("Fonduer has changed the HTML")
+
+        if fonduer_html == label_studio_html:
+            print("Fonduer and Label Studio have the same HTML")

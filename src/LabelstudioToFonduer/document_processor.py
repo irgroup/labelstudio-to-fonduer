@@ -1,3 +1,4 @@
+# TODO: check licensing on that file
 from fonduer.parser.preprocessors.doc_preprocessor import DocPreprocessor
 from typing import Iterator
 from bs4 import BeautifulSoup
@@ -17,9 +18,7 @@ class My_HTMLDocPreprocessor(DocPreprocessor):
                     f"Expecting exactly one html element per html file: {file_name}"
                 )
             text = all_html_elements[0]
-            name = os.path.basename(document_path)[
-                : os.path.basename(document_path).rfind(".")
-            ]
+            name = os.path.basename(document_path)[: os.path.basename(document_path).rfind(".")]
             stable_id = self._get_stable_id(name)
             yield Document(
                 name=name,
