@@ -1,7 +1,29 @@
+# -*- coding: utf-8 -*-
+"""Convert documents so that they can be used by Fonduer and Label Studio without beeing changed
+during the process. This is crucial to reliably map the annotations back to the original documents.
+"""
+import html
+import logging
+
 import os
+import shutil
 from typing import Optional
+
+import label_studio_sdk
+import requests
+import sqlalchemy
 from bs4 import BeautifulSoup, Comment
 from bs4.formatter import HTMLFormatter
+from fonduer import Meta
+from fonduer.parser import Parser
+from fonduer.parser.models import Document
+from label_studio_sdk import Client
+
+from .util import init_logger
+from LabelstudioToFonduer.document_processor import My_HTMLDocPreprocessor
+
+
+logger = init_logger(__name__)
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -53,12 +75,12 @@ class DocumentConverter:
 
             all_html_elements = soup.find_all("html")
             text = all_html_elements[0].prettify(formatter=UnsortedAttributes())
-            # text = all_html_elements[0].prettify(formatter=None)
 
             filename = os.path.basename(document_path).replace("(", "").replace(")", "")
 
             with open(os.path.join(output_path, filename), "w", encoding="utf-8") as file:
                 file.write(str(text))
+                logger.info(f"Converted document `{filename}`.")
 
     def convert(self, input_: str, output_path: str, encoding: Optional[str] = None) -> None:
         """Converter wrapper function to convert a single document or a directory of documents.
@@ -86,32 +108,18 @@ class DocumentConverter:
             self.convert_one(input_, output_path)
 
         elif not os.path.exists(input_):
+            logger.critical(f" Abborting: File or directory {input_} does not exist.")
             raise FileNotFoundError(f"File or directory {input_} does not exist.")
 
 
-import requests
-from label_studio_sdk import Client
-import label_studio_sdk
-from LabelstudioToFonduer.document_processor import My_HTMLDocPreprocessor
-import os
-import sys
-import logging
-import sqlalchemy
-from typing import Iterator
-
-from bs4 import BeautifulSoup
-from fonduer import Meta, init_logging
-from fonduer.parser.preprocessors import HTMLDocPreprocessor
-from fonduer.parser.preprocessors.doc_preprocessor import DocPreprocessor
-
-from fonduer.parser import Parser
-from fonduer.parser.models import Document, Sentence
-
-import html
-import shutil
-
-
 class ConversionChecker:
+    """Compare the different representations Label Studio and Fonduer may create from the same HTML
+    document. This is useful to check if the conversion of the document is correct. The document is
+    first converted to a format that is natively supported by Fonduer. Then, the document is imported
+    into Label Studio and Fonduer. The HTML representation of the document in Label Studio and
+    Fonduer is compared. If the HTML representations are the same, the conversion was successful.
+    """
+
     def __init__(
         self,
         label_studio_url: str,
@@ -140,6 +148,7 @@ class ConversionChecker:
 
     def process_fonduer(self, docs_path: str):
         def _wipe_db():
+            """Wipe the Fonduer database."""
             engine = sqlalchemy.create_engine(self.fonduer_postgres_url)
             conn = engine.connect()
             conn.execute("commit")
@@ -160,6 +169,7 @@ class ConversionChecker:
             conn.execute("drop database " + self.project_name)
 
         def _clean_db():
+            """Clean the Fonduer database and create a new database for the comparision."""
             current_dbs = engine.execute("SELECT datname FROM pg_database;").fetchall()
             current_dbs = [db[0] for db in current_dbs]
 
@@ -177,7 +187,6 @@ class ConversionChecker:
         _clean_db()
 
         # setup Fonduer
-        init_logging(log_dir="logs")
         session = Meta.init(self.fonduer_postgres_url + self.project_name).Session()
         doc_preprocessor = My_HTMLDocPreprocessor(docs_path, max_docs=100)
 
@@ -201,7 +210,21 @@ class ConversionChecker:
             file.write(html_str)
 
     def process_label_studio(self, docs_path: str):
+        """Process pipeline for Label Studio.
+
+        Import a given document to Label Studio and export the documents back to the computer to
+        compare the results and investigate any changes that might have occured.
+
+        Args:
+            docs_path (str): Path to the documents.
+        """
+
         def delete_all_tasks(project: label_studio_sdk.Project):
+            """Delete all tasks from the temporary project.
+
+            Args:
+                project (label_studio_sdk.Project): Project for comparision.
+            """
             r = requests.delete(
                 self.label_studio_url + f"/api/projects/{project.id}/tasks/",
                 headers={"Authorization": "Token " + self.label_studio_api_key},
@@ -247,7 +270,14 @@ class ConversionChecker:
         ) as file:
             file.write(html)
 
-    def check(self, docs_path):
+    def check(self, docs_path: str):
+        """Import the given documents into Label Studio and Fonduer, then export them back and
+        compare the results.
+
+        Args:
+            docs_path (str): Path to the documents.
+        """
+
         def load_html(prefix, docs_path):
             file_names = os.listdir(docs_path)
             assert file_names
@@ -279,14 +309,21 @@ class ConversionChecker:
         original_html = load_html("ORIGINAL", docs_path)
 
         # Compare
+        logging.getLogger("fonduer").disabled = True
+        print(logging)
         if original_html == label_studio_html:
-            print("Label Studio has not changed the HTML")
+            print("✓ Label Studio has not changed the HTML.")
+            logger.info("✓ Label Studio has not changed the HTML.")
         else:
-            print("Label Studio has changed the HTML")
+            logger.warning("✗ Label Studio has changed the HTML.")
         if fonduer_html == original_html:
-            print("Fonduer has not changed the HTML")
+            print("✓ Fonduer has not changed the HTML.")
+            logger.info("✓ Fonduer has not changed the HTML.")
         else:
-            print("Fonduer has changed the HTML")
+            logger.warning("✗ Fonduer has changed the HTML.")
 
         if fonduer_html == label_studio_html:
-            print("Fonduer and Label Studio have the same HTML")
+            print("✓ Fonduer and Label Studio have the same HTML.")
+            logger.info("✓ Fonduer and Label Studio have the same HTML.")
+        else:
+            logger.warning("✗ Fonduer and Label Studio have different HTML.")
