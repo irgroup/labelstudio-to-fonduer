@@ -98,9 +98,6 @@ class FonduerToLabelStudio:
 
             if results:
                 html_span = results[0].text_content()
-
-                # offset_plus = html_span.find(fd_span)  # Search for the FD span in the LS span
-
                 # if string is multiple times in the context, the occurence with the closest offset
                 # to the offset from Fonduer is used
                 matches = get_offsets(fd_span, html_span)
