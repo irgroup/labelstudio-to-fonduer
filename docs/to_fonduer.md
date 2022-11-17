@@ -4,5 +4,5 @@
         members:
             - parse_export
             - LabelStudioExport
-            - ToFonduer
+            - LabelStudioToFonduer
             
