@@ -14,8 +14,21 @@ from .util import init_logger
 
 logger = init_logger(__name__)
 
+
 # Data model
-class LabelStudioEntiti:
+class LabelStudioEntity:
+    """Representation of a Label Studio entity from a document of an export.
+
+    This object represents an entity with all relevant information from a Label Studio Export.
+
+    Args:
+        start_offset (int): The number of the first char of the entity in the full sentence.
+        end_offset (int): The number of the last char of the entity in the full sentence.
+        text (str): The literal text of the entity.
+        label (str): The assigned label of the entity.
+        xpath (str): The XPath address of the element (full sentence) in the HTML document.
+        filename (str): The file name of the document the entities originate from.
+    """
     def __init__(
         self,
         start_offset: int,
@@ -25,18 +38,6 @@ class LabelStudioEntiti:
         xpath: str,
         filename: str,
     ) -> None:
-        """Representation of a Label Studio entity from a document of an export.
-
-        This object represents an entity with all relevant information from a Label Studio Export.
-
-        Args:
-            start_offset (int): The number of the first char of the entity in the full sentence.
-            end_offset (int): The number of the last char of the entity in the full sentence.
-            text (str): The literal text of the entity.
-            label (str): The assigned label of the entity.
-            xpath (str): The XPath address of the element (full sentence) in the HTML document.
-            filename (str): The file name of the document the entities originate from.
-        """
         self.start_offset = start_offset
         self.end_offset = end_offset
         self.text = text
@@ -52,17 +53,17 @@ class LabelStudioEntiti:
 
 
 class LabelStudioDocument:
-    def __init__(self, filename: str, entities: List[LabelStudioEntiti], html: str) -> None:
-        """Representation of a Label Studio document.
+    """Representation of a Label Studio document.
 
-        This object represents a single document in an export from Label Studio. It contains the
-        different annotated entities.
+    This object represents a single document in an export from Label Studio. It contains the
+    different annotated entities.
 
-        Args:
-            filename (str): File name of the document.
-            entities (List[LabelStudioEntiti]): List of all entities in that document.
-            html (str): Original HTML string of the document.
-        """
+    Args:
+        filename (str): File name of the document.
+        entities (List[LabelStudioEntity]): List of all entities in that document.
+        html (str): Original HTML string of the document.
+    """
+    def __init__(self, filename: str, entities: List[LabelStudioEntity], html: str) -> None:
         self.filename = filename
         self.entities = entities
         self.html = html
@@ -75,19 +76,18 @@ class LabelStudioDocument:
 
 
 class LabelStudioExport:
+    """Representation of a Label Studio export.
+
+    This object contains all necessary information from a label studio export to transfer the
+    labeled entities to the Fonduer data model. Additionally, supplementing functions to
+    determine the set of labels and their ngram size are available.
+
+    Args:
+        documents (List[LabelStudioDocument]): Parsed documents that are labeled in the Label
+        Studio export.
+        file_path (str): Path to the `export.json` file from Label Studio.
+    """
     def __init__(self, documents: List[LabelStudioDocument], file_path: str) -> None:
-        """Representation of a Label Studio export.
-
-        This object contains all necessary information from a label studio export to transfer the
-        labeled entities to the Fonduer data model. Additionally, supplementing functions to
-        determine the set of labels and their ngram size are available.
-
-        Args:
-            documents (List[LabelStudioDocument]): Parsed documents that are labeled in the Label
-            Studio export.
-            file_path (str): Path to the `export.json` file from Label Studio.
-        """
-
         self.documents = documents
         self.file_path = file_path
 
@@ -109,9 +109,11 @@ class LabelStudioExport:
         All entities in all documents are split on whitespaces. The length of the shortest and
         longest entity is reported as ngram size.
 
-        Warning: Fonduer might split sentences differently. Therefore, special characters not
-        labeled might also count as tokens. Therefore, a slightly longer ngram size might be
-        needed to account for these tokens.
+        ???+ warning "Extra padding needed"
+
+            Fonduer might split sentences differently. Therefore, special characters not
+            labeled might also count as tokens. Therefore, a slightly longer ngram size might be
+            needed to account for these tokens.
 
         Args:
             label (str): The label the ngram size should be determined for.
@@ -200,7 +202,7 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
             xpath = entity["value"]["start"]
 
             entities.append(
-                LabelStudioEntiti(start_offset, end_offset, text.strip(), label, xpath, filename)
+                LabelStudioEntity(start_offset, end_offset, text.strip(), label, xpath, filename)
             )
 
         document = LabelStudioDocument(filename=filename, entities=entities, html=html_string)
@@ -209,45 +211,46 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
 
 
 # API class
-class LabelStudioToFonduer:
+class ToFonduer:
+    """Interface to transfer Label Studio labels to Fonduer.
+
+    Provided with a parsed label studio export and a connection to Fonduer, this interface can
+    transfer labels from the Label Studio Export to Fonduer. Therefore, the annotated entities
+    from the Label Studio export are used to identify Candidates in Fonduer.
+    As this transfer is not trivial, multiple features are needed:
+
+    - Filename: Identifies the document
+    - XPath: Identifies the sentence (element) in the document.
+    - Offsets: Identify the beginning and end of the actual labeled text in the sentence.
+
+    Fonduer uses an absolut XPath and Label Studio a relative XPath. Therefore, the relative
+    XPath is transferred to a relative one by using the original HTML.
+
+    From all identified entities, a table is created that can be used by a Fonduer gold function
+    to compare Fonduer candidates to the table. If a Fonduer Candidate is in the gold table, it
+    is a gold label.
+
+    Args:
+        label_studio_export (LabelStudioExport): The parsed Label Studio export.
+        fonduer_session (sqlalchemy.orm.session.Session): The connection to Fonduer.
+    """
     def __init__(
         self,
         label_studio_export: LabelStudioExport,
         fonduer_session: sqlalchemy.orm.session.Session,
     ) -> None:
-        """Interface to transfer Label Studio labels to Fonduer.
-
-        Provided with a parsed label studio export and a connection to Fonduer, this interface can
-        transfer labels from the Label Studio Export to Fonduer. Therefore, the annotated entities
-        from the Label Studio export are used to identify Candidates in Fonduer.
-        As this transfer is not trivial, multiple features are needed:
-            * Filename: Identifies the document
-            * XPath: Identifies the sentence (element) in the document.
-            * Offsets: Identify the beginning and end of the actual labeled text in the sentence.
-
-        Fonduer uses an absolut XPath and Label Studio a relative XPath. Therefore, the relative
-        XPath is transferred to a relative one by using the original HTML.
-
-        From all identified entities, a table is created that can be used by a Fonduer gold function
-        to compare Fonduer candidates to the table. If a Fonduer Candidate is in the gold table, it
-        is a gold label.
-
-        Args:
-            label_studio_export (LabelStudioExport): The parsed Label Studio export.
-            fonduer_session (sqlalchemy.orm.session.Session): The connection to Fonduer.
-        """
         self.label_studio_export = label_studio_export
         self.fonduer_session = fonduer_session
 
         self.gold_table = self.make_gold_table()
 
     # determine entities in FD
-    def fonduer_document_id(self, entity: LabelStudioEntiti) -> Union[int, bool]:
+    def fonduer_document_id(self, entity: LabelStudioEntity) -> Union[int, bool]:
         """Get the Fonduer document ID from a label studio entity. To find the correct entity
         the filename is queried in the Fonduer database.
 
         Args:
-            entity (LabelStudioEntiti): The label studio entity for that the fonduer document
+            entity (LabelStudioEntity): The label studio entity for that the fonduer document
                                         id should be retrieved.
 
         Returns:
@@ -270,7 +273,7 @@ class LabelStudioToFonduer:
             return document_id[0][0]
 
     def fonduer_sentence_id(
-        self, entity: LabelStudioEntiti, document_id: int, html: str
+        self, entity: LabelStudioEntity, document_id: int, html: str
     ) -> Optional[int]:
         """Get the Fonduer sentence ID from a label studio entity, its document ID and the original
         html.
@@ -278,7 +281,7 @@ class LabelStudioToFonduer:
         which is then used to query the Fonduer database together with the document ID
 
         Args:
-            entity (LabelStudioEntiti): The label studio entity for that the fonduer document
+            entity (LabelStudioEntity): The label studio entity for that the fonduer document
                                         id should be retrieved.
             document_id (int): Fonduer ID for the document the entity originates from.
             html (str): Original HTML document as a string.
@@ -380,7 +383,7 @@ class LabelStudioToFonduer:
             two entities in one row.
         """
 
-        def get_features(entity: LabelStudioEntiti) -> Dict[str, Any]:
+        def get_features(entity: LabelStudioEntity) -> Dict[str, Any]:
             document_id = self.fonduer_document_id(entity)
             sentence_id = self.fonduer_sentence_id(entity, document_id, document.html)
             return {

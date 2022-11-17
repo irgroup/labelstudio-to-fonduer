@@ -11,27 +11,28 @@ from .util import init_logger, highlight_span
 logger = init_logger(__name__)
 
 
-def get_offsets(span: str, sentence: str) -> List[Tuple[int, int]]:
-    """Get all occurences of a span in a sentence and return the offset
-
-    Args:
-        span (str): Span to be matched.
-        sentence (str): Sentence to be searched.
-
-    Returns:
-        List[Tuple[int, int]]: List of offsets.
-    """
-    span_escaped = re.escape(span)
-    result = re.finditer(span_escaped, sentence)
-    offsets = []
-    for match in result:
-        offsets.append((match.start(), match.end()))
-    return offsets
 
 
-class FonduerToLabelStudio:
+
+class ToLabelStudio:
     """Transfere Fonduer candidates to Label Studio Labes."""
+    def get_offsets(self, span: str, sentence: str) -> List[Tuple[int, int]]:
+        """Get all occurences of a span in a sentence and return the offset
 
+        Args:
+            span (str): Span to be matched.
+            sentence (str): Sentence to be searched.
+
+        Returns:
+            List[Tuple[int, int]]: List of offsets.
+        """
+        span_escaped = re.escape(span)
+        result = re.finditer(span_escaped, sentence)
+        offsets = []
+        for match in result:
+            offsets.append((match.start(), match.end()))
+        return offsets
+        
     def seriealize_relation(self, relation: Any, confidence: float = 0.00) -> List[Dict[str, Any]]:
         """Serialize a Fonduer candidate relation into a Label Studio annotated relation of entities.
 
@@ -79,7 +80,7 @@ class FonduerToLabelStudio:
                 html_span = results[0].text_content()
                 # if string is multiple times in the context, the occurence with the closest offset
                 # to the offset from Fonduer is used
-                matches = get_offsets(fd_span, html_span)
+                matches = self.get_offsets(fd_span, html_span)
 
                 if len(matches) > 1:
                     candidates = []
@@ -104,10 +105,10 @@ class FonduerToLabelStudio:
 
         # html text
         html_document = relation.document.text
-        results = []
+        results_section = []
 
         # add relation
-        results.append(
+        results_section.append(
             {
                 "from_id": relation[0].id,
                 "to_id": relation[1].id,
@@ -175,9 +176,9 @@ class FonduerToLabelStudio:
                     "hypertextlabels": [entity.type[0].upper() + entity.type[1:]],
                 },
             }
-            results.append(result)
+            results_section.append(result)
 
-        return results
+        return results_section
 
     def create_export(
         self, candidates: List[Any], fonduer_export_path: str = ""

@@ -10,7 +10,6 @@ from typing import Optional
 
 import label_studio_sdk
 import requests
-import sqlalchemy
 from bs4 import BeautifulSoup, Comment
 from bs4.formatter import HTMLFormatter
 from fonduer import Meta
@@ -18,8 +17,10 @@ from fonduer.parser import Parser
 from fonduer.parser.models import Document
 from label_studio_sdk import Client
 
-from .util import init_logger
-from .fonduer_tools import save_create_project
+from LabelstudioToFonduer.util import init_logger
+# from .util import init_logger
+from LabelstudioToFonduer.fonduer_tools import save_create_project
+# from .fonduer_tools import save_create_project
 from LabelstudioToFonduer.document_processor import My_HTMLDocPreprocessor
 
 
@@ -73,6 +74,7 @@ class DocumentConverter:
             for comments in soup.findAll(text=lambda text: isinstance(text, Comment)):
                 comments.extract()
 
+            # Fix Attribute sorting issue
             all_html_elements = soup.find_all("html")
             text = all_html_elements[0].prettify(formatter=UnsortedAttributes())
 
