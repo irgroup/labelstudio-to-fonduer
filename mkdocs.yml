@@ -1,0 +1,68 @@
+site_name: Label Studio to Fonduer
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+          merge_init_into_class: yes
+ 
+  - search:
+      prebuild_index: true
+  - mkdocs-jupyter
+
+theme: 
+    name: material
+    favicon: 
+    icon:
+        repo: fontawesome/brands/github
+        logo: fontawesome/solid/hashtag
+    features:
+        - header.autohide
+        - navigation.tracking
+        - navigation.sections
+        - navigation.top
+        - content.code.annotate
+    palette:
+        primary: teal
+        accent: deep orange
+    font:
+        text: Roboto
+
+extra_css:
+- css/mkdocstrings.css
+
+repo_url: https://github.com/irgroup/labelstudio-to-fonduer
+repo_name: labelstudio-to-fonduer
+edit_uri: https://github.com/irgroup/labelstudio-to-fonduer/tree/main/docs
+
+markdown_extensions:
+  - attr_list
+  - def_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+
+nav:
+  - "Introcuction": index.md
+  - "Examples": 
+    - "Document Converter": example_document_converter.md
+    - "From Label Studio to Fonduer": ToFonduer.ipynb
+    - "From Fonduer to Label Studio": ToLabelStudio.ipynb
+  - "Documentation":
+    - "Document Converter": document_converter.md
+    - "To Label Studio": to_label_studio.md
+    - "To Fonduer": to_fonduer.md
+    - "Tools": fonduer_tools.md
+
+watch:
+  - src/LabelstudioToFonduer

@@ -74,7 +74,7 @@ def init_logger(name: str) -> logging.Logger:
     consol_handler = logging.StreamHandler()
     file_handler = logging.FileHandler("app.log")
 
-    consol_handler.setLevel(logging.DEBUG)
+    consol_handler.setLevel(logging.WARNING)
     file_handler.setLevel(logging.INFO)
 
     # Create formatters and add it to handlers
