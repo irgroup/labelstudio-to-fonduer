@@ -20,7 +20,8 @@ Therefore, the documents need to be converted into a structure that does not nee
 pip install git+https://github.com/irgroup/labelstudio-to-fonduer.git#egg=labelstudiotofonduer\&subdirectory=src
 ```
 
-
+## Documentation:
+The documentation and a more extensive user guide with examples can be found [here](https://irgroup.github.io/labelstudio-to-fonduer/).
 
 ## Examples:
 [From Fonduer to Label Studio](docs/ToLabelStudio.ipynb):
