@@ -4,7 +4,7 @@ By that, documents annotated in Label Studio can be used as gold labels in Fondu
 
 
 Label Studio and especially Fonduer create their own representation of an HTML document. 
-![Problem](docs/problem.png | width=300)
+![Problem](docs/problem.png)
 
 Therefore, the documents need to be converted into a structure that does not need to be modified by Label Studio or Fonduer.
 
