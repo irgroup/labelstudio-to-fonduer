@@ -1,0 +1,12 @@
+[2022-11-17 12:47:34,482][INFO] fonduer.meta:49 - Setting logging directory to: data/mails/logs/2022-11-17_12-47-34
+[2022-11-17 12:47:34,484][INFO] fonduer.meta:135 - Connecting user:postgres to 127.0.0.1:5432/mails_sm
+[2022-11-17 12:47:34,555][INFO] fonduer.meta:162 - Initializing the storage schema
+[2022-11-17 12:48:12,270][INFO] fonduer.meta:53 - Logging was already initialized to use data/mails/logs/2022-11-17_12-47-34.  To configure logging manually, call fonduer.init_logging before initialiting Meta.
+[2022-11-17 12:48:12,271][INFO] fonduer.meta:135 - Connecting user:postgres to 127.0.0.1:5432/mails_sm
+[2022-11-17 12:48:12,271][INFO] fonduer.meta:162 - Initializing the storage schema
+[2022-11-17 12:48:13,670][INFO] fonduer.utils.udf:67 - Running UDF...
+[2022-11-17 12:48:21,541][INFO] fonduer.candidates.mentions:467 - Clearing table: title
+[2022-11-17 12:48:21,609][INFO] fonduer.candidates.mentions:467 - Clearing table: date
+[2022-11-17 12:48:21,617][INFO] fonduer.utils.udf:67 - Running UDF...
+[2022-11-17 12:48:29,910][INFO] fonduer.candidates.candidates:138 - Clearing table title_date (split 0)
+[2022-11-17 12:48:29,936][INFO] fonduer.utils.udf:67 - Running UDF...

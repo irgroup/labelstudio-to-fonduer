@@ -1,0 +1,276 @@
+[2022-11-17 12:46:50,316][INFO] fonduer.meta:49 - Setting logging directory to: data/mails/logs/2022-11-17_12-46-50
+[2022-11-17 12:46:50,317][INFO] fonduer.meta:135 - Connecting user:postgres to 127.0.0.1:5432/mails_sm
+[2022-11-17 12:46:50,391][INFO] fonduer.meta:162 - Initializing the storage schema
+[2022-11-17 12:46:52,062][INFO] fonduer.utils.udf:67 - Running UDF...
+[2022-11-17 12:46:57,530][INFO] fonduer.candidates.mentions:467 - Clearing table: title
+[2022-11-17 12:46:57,548][INFO] fonduer.candidates.mentions:467 - Clearing table: date
+[2022-11-17 12:46:57,550][INFO] fonduer.utils.udf:67 - Running UDF...
+[2022-11-17 12:47:00,970][INFO] fonduer.candidates.candidates:138 - Clearing table title_date (split 0)
+[2022-11-17 12:47:00,988][INFO] fonduer.utils.udf:67 - Running UDF...
+[2022-11-17 12:47:01,547][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_0' XPath: '/html/body/ul[1]/li/a/span[1]'
+[2022-11-17 12:47:01,549][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_0' Offset_start: '0' Offset_end: '84'
+[2022-11-17 12:47:01,550][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_0' Plus: '7'
+[2022-11-17 12:47:01,551][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_0' Span: 'file_0'
+[2022-11-17 12:47:01,551][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_0' Raw: ''\n      3-D reconstruction of skull suggests a small crocodyliform dinosaur is a new species\n     ''
+[2022-11-17 12:47:01,552][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_0' Marked: '
+      [6;30;42m3-D reconstruction of skull suggests a small crocodyliform dinosaur is a new species[0m
+     '
+[2022-11-17 12:47:01,560][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_0' XPath: '/html/body/p[9]/strong/span'
+[2022-11-17 12:47:01,561][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_0' Offset_start: '9' Offset_end: '40'
+[2022-11-17 12:47:01,561][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_0' Plus: '6'
+[2022-11-17 12:47:01,562][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_0' Span: 'file_0'
+[2022-11-17 12:47:01,563][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_0' Raw: ''\n     EMBARGO: February 15, 2017 11 AM Pacific / 2 PM Eastern Time\n    ''
+[2022-11-17 12:47:01,565][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_0' Marked: '
+     EMBARGO: [6;30;42mFebruary 15, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+    '
+[2022-11-17 12:47:01,576][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_0' XPath: '/html/body/p[11]/strong/span'
+[2022-11-17 12:47:01,576][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_0' Offset_start: '0' Offset_end: '84'
+[2022-11-17 12:47:01,577][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_0' Plus: '6'
+[2022-11-17 12:47:01,577][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_0' Span: 'file_0'
+[2022-11-17 12:47:01,578][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_0' Raw: ''\n     3-D reconstruction of skull suggests a small crocodyliform dinosaur is a new species\n    ''
+[2022-11-17 12:47:01,579][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_0' Marked: '
+     [6;30;42m3-D reconstruction of skull suggests a small crocodyliform dinosaur is a new species[0m
+    '
+[2022-11-17 12:47:01,583][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_0' XPath: '/html/body/p[9]/strong/span'
+[2022-11-17 12:47:01,585][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_0' Offset_start: '9' Offset_end: '40'
+[2022-11-17 12:47:01,587][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_0' Plus: '6'
+[2022-11-17 12:47:01,588][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_0' Span: 'file_0'
+[2022-11-17 12:47:01,589][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_0' Raw: ''\n     EMBARGO: February 15, 2017 11 AM Pacific / 2 PM Eastern Time\n    ''
+[2022-11-17 12:47:01,590][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_0' Marked: '
+     EMBARGO: [6;30;42mFebruary 15, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+    '
+[2022-11-17 12:47:01,603][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_1' XPath: '/html/body/ul/li[1]/span/a'
+[2022-11-17 12:47:01,605][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_1' Offset_start: '0' Offset_end: '73'
+[2022-11-17 12:47:01,605][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_1' Plus: '7'
+[2022-11-17 12:47:01,606][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_1' Span: 'file_1'
+[2022-11-17 12:47:01,607][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_1' Raw: ''\n      A Single Mutation May Impact Infectivity of West Nile and Similar Viruses\n     ''
+[2022-11-17 12:47:01,607][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_1' Marked: '
+      [6;30;42mA Single Mutation May Impact Infectivity of West Nile and Similar Viruses[0m
+     '
+[2022-11-17 12:47:01,616][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_1' XPath: '/html/body/p[7]/strong/span'
+[2022-11-17 12:47:01,617][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_1' Offset_start: '9' Offset_end: '40'
+[2022-11-17 12:47:01,618][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_1' Plus: '6'
+[2022-11-17 12:47:01,618][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_1' Span: 'file_1'
+[2022-11-17 12:47:01,619][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_1' Raw: ''\n     EMBARGO: February 16, 2017 11 AM Pacific / 2 PM Eastern Time\n    ''
+[2022-11-17 12:47:01,620][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_1' Marked: '
+     EMBARGO: [6;30;42mFebruary 16, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+    '
+[2022-11-17 12:47:01,637][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_1' XPath: '/html/body/p[9]/strong[1]/span'
+[2022-11-17 12:47:01,637][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_1' Offset_start: '0' Offset_end: '73'
+[2022-11-17 12:47:01,638][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_1' Plus: '6'
+[2022-11-17 12:47:01,638][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_1' Span: 'file_1'
+[2022-11-17 12:47:01,639][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_1' Raw: ''\n     A Single Mutation May Impact Infectivity of West Nile and Similar Viruses\n    ''
+[2022-11-17 12:47:01,639][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_1' Marked: '
+     [6;30;42mA Single Mutation May Impact Infectivity of West Nile and Similar Viruses[0m
+    '
+[2022-11-17 12:47:01,643][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_1' XPath: '/html/body/p[7]/strong/span'
+[2022-11-17 12:47:01,643][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_1' Offset_start: '9' Offset_end: '40'
+[2022-11-17 12:47:01,644][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_1' Plus: '6'
+[2022-11-17 12:47:01,644][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_1' Span: 'file_1'
+[2022-11-17 12:47:01,647][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_1' Raw: ''\n     EMBARGO: February 16, 2017 11 AM Pacific / 2 PM Eastern Time\n    ''
+[2022-11-17 12:47:01,650][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_1' Marked: '
+     EMBARGO: [6;30;42mFebruary 16, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+    '
+[2022-11-17 12:47:01,664][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_2' XPath: '/html/head/title'
+[2022-11-17 12:47:01,665][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_2' Offset_start: '0' Offset_end: '75'
+[2022-11-17 12:47:01,666][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_2' Plus: '4'
+[2022-11-17 12:47:01,667][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_2' Span: 'file_2'
+[2022-11-17 12:47:01,668][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_2' Raw: ''\n   A head joint found in deep-sea fishes may enable them to swallow large prey + 2 more: PLOS ONE Press\n  ''
+[2022-11-17 12:47:01,670][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_2' Marked: '
+   [6;30;42mA head joint found in deep-sea fishes may enable them to swallow large prey[0m + 2 more: PLOS ONE Press
+  '
+[2022-11-17 12:47:01,678][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_2' XPath: '/html/body/span/table[1]/tbody/tr/td/p[4]/span/span/strong'
+[2022-11-17 12:47:01,680][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_2' Offset_start: '9' Offset_end: '39'
+[2022-11-17 12:47:01,680][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_2' Plus: '12'
+[2022-11-17 12:47:01,682][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_2' Span: 'file_2'
+[2022-11-17 12:47:01,684][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_2' Raw: ''\n           EMBARGO: February 1, 2017 11 AM Pacific / 2 PM Eastern Time\n          ''
+[2022-11-17 12:47:01,685][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_2' Marked: '
+           EMBARGO: [6;30;42mFebruary 1, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+          '
+[2022-11-17 12:47:01,696][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_2' XPath: '/html/body/span/table[1]/tbody/tr/td/ul[1]/li[1]/span/span/a'
+[2022-11-17 12:47:01,699][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_2' Offset_start: '0' Offset_end: '75'
+[2022-11-17 12:47:01,701][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_2' Plus: '13'
+[2022-11-17 12:47:01,702][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_2' Span: 'file_2'
+[2022-11-17 12:47:01,703][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_2' Raw: ''\n            A head joint found in deep-sea fishes may enable them to swallow large prey\n           ''
+[2022-11-17 12:47:01,705][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_2' Marked: '
+            [6;30;42mA head joint found in deep-sea fishes may enable them to swallow large prey[0m
+           '
+[2022-11-17 12:47:01,709][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_2' XPath: '/html/body/span/table[1]/tbody/tr/td/p[4]/span/span/strong'
+[2022-11-17 12:47:01,710][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_2' Offset_start: '9' Offset_end: '39'
+[2022-11-17 12:47:01,711][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_2' Plus: '12'
+[2022-11-17 12:47:01,712][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_2' Span: 'file_2'
+[2022-11-17 12:47:01,716][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_2' Raw: ''\n           EMBARGO: February 1, 2017 11 AM Pacific / 2 PM Eastern Time\n          ''
+[2022-11-17 12:47:01,717][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_2' Marked: '
+           EMBARGO: [6;30;42mFebruary 1, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+          '
+[2022-11-17 12:47:01,738][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_2' XPath: '/html/body/span/table[1]/tbody/tr/td/p[5]/span/span/strong/u'
+[2022-11-17 12:47:01,739][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_2' Offset_start: '0' Offset_end: '75'
+[2022-11-17 12:47:01,740][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_2' Plus: '13'
+[2022-11-17 12:47:01,741][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_2' Span: 'file_2'
+[2022-11-17 12:47:01,742][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_2' Raw: ''\n            A head joint found in deep-sea fishes may enable them to swallow large prey\n            \n\n''
+[2022-11-17 12:47:01,742][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_2' Marked: '
+            [6;30;42mA head joint found in deep-sea fishes may enable them to swallow large prey[0m
+            
+
+'
+[2022-11-17 12:47:01,746][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_2' XPath: '/html/body/span/table[1]/tbody/tr/td/p[4]/span/span/strong'
+[2022-11-17 12:47:01,748][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_2' Offset_start: '9' Offset_end: '39'
+[2022-11-17 12:47:01,750][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_2' Plus: '12'
+[2022-11-17 12:47:01,751][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_2' Span: 'file_2'
+[2022-11-17 12:47:01,751][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_2' Raw: ''\n           EMBARGO: February 1, 2017 11 AM Pacific / 2 PM Eastern Time\n          ''
+[2022-11-17 12:47:01,752][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_2' Marked: '
+           EMBARGO: [6;30;42mFebruary 1, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+          '
+[2022-11-17 12:47:01,768][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_3' XPath: '/html/body/div/div/div[1]/strong[4]'
+[2022-11-17 12:47:01,770][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_3' Offset_start: '0' Offset_end: '73'
+[2022-11-17 12:47:01,771][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_3' Plus: '7'
+[2022-11-17 12:47:01,771][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_3' Span: 'file_3'
+[2022-11-17 12:47:01,772][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_3' Raw: ''\n      ACP recommends drug-free approach for treating nonradicular low back pain\n     ''
+[2022-11-17 12:47:01,773][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_3' Marked: '
+      [6;30;42mACP recommends drug-free approach for treating nonradicular low back pain[0m
+     '
+[2022-11-17 12:47:01,783][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_3' XPath: '/html/body/div/div/div[1]/strong[1]/font'
+[2022-11-17 12:47:01,785][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_3' Offset_start: '28' Offset_end: '67'
+[2022-11-17 12:47:01,786][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_3' Plus: '8'
+[2022-11-17 12:47:01,787][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_3' Span: 'file_3'
+[2022-11-17 12:47:01,788][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_3' Raw: ''\n       Embargoed for release until 5:00 p.m. ET on Monday 13 February 2017\n      ''
+[2022-11-17 12:47:01,789][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_3' Marked: '
+       Embargoed for release until [6;30;42m5:00 p.m. ET on Monday 13 February 2017[0m
+      '
+[2022-11-17 12:47:01,797][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_4' XPath: '/html/body/span/div[66]'
+[2022-11-17 12:47:01,798][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_4' Offset_start: '1' Offset_end: '73'
+[2022-11-17 12:47:01,799][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_4' Plus: '23'
+[2022-11-17 12:47:01,800][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_4' Span: 'file_4'
+[2022-11-17 12:47:01,801][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_4' Raw: ''\n\n     Title:\n    \n    “Energetic Particle Data from the Global Positioning System Constellation”\n   ''
+[2022-11-17 12:47:01,802][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_4' Marked: '
+
+     Title:
+    
+    “[6;30;42mEnergetic Particle Data from the Global Positioning System Constellation[0m”
+   '
+[2022-11-17 12:47:01,810][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_4' XPath: '/html/body/span/div[5]'
+[2022-11-17 12:47:01,810][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_4' Offset_start: '0' Offset_end: '15'
+[2022-11-17 12:47:01,811][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_4' Plus: '5'
+[2022-11-17 12:47:01,812][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_4' Span: 'file_4'
+[2022-11-17 12:47:01,813][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_4' Raw: ''\n    30 January 2017\n   ''
+[2022-11-17 12:47:01,813][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_4' Marked: '
+    [6;30;42m30 January 2017[0m
+   '
+[2022-11-17 12:47:01,824][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_5' XPath: '/html/body/span/div[67]'
+[2022-11-17 12:47:01,825][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_5' Offset_start: '1' Offset_end: '37'
+[2022-11-17 12:47:01,826][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_5' Plus: '23'
+[2022-11-17 12:47:01,827][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_5' Span: 'file_5'
+[2022-11-17 12:47:01,828][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_5' Raw: ''\n\n     Title:\n    \n    “The vanishing cryovolcanoes of Ceres”\n   ''
+[2022-11-17 12:47:01,829][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_5' Marked: '
+
+     Title:
+    
+    “[6;30;42mThe vanishing cryovolcanoes of Ceres[0m”
+   '
+[2022-11-17 12:47:01,840][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_5' XPath: '/html/body/span/div[5]'
+[2022-11-17 12:47:01,841][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_5' Offset_start: '0' Offset_end: '15'
+[2022-11-17 12:47:01,842][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_5' Plus: '5'
+[2022-11-17 12:47:01,842][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_5' Span: 'file_5'
+[2022-11-17 12:47:01,843][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_5' Raw: ''\n    2 February 2017\n   ''
+[2022-11-17 12:47:01,844][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_5' Marked: '
+    [6;30;42m2 February 2017[0m
+   '
+[2022-11-17 12:47:01,871][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_6' XPath: '/html/head/title'
+[2022-11-17 12:47:01,874][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_6' Offset_start: '0' Offset_end: '74'
+[2022-11-17 12:47:01,876][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_6' Plus: '4'
+[2022-11-17 12:47:01,881][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_6' Span: 'file_6'
+[2022-11-17 12:47:01,884][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_6' Raw: ''\n   Brain-computer interface allows completely locked-in people to communicate: A PLOS Biology PR\n  ''
+[2022-11-17 12:47:01,888][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_6' Marked: '
+   [6;30;42mBrain-computer interface allows completely locked-in people to communicate[0m: A PLOS Biology PR
+  '
+[2022-11-17 12:47:01,902][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_6' XPath: '/html/body/span/table[1]/tbody/tr/td/p[2]/span/span/strong'
+[2022-11-17 12:47:01,905][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_6' Offset_start: '9' Offset_end: '39'
+[2022-11-17 12:47:01,906][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_6' Plus: '12'
+[2022-11-17 12:47:01,907][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_6' Span: 'file_6'
+[2022-11-17 12:47:01,907][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_6' Raw: ''\n           EMBARGO: January 31, 2017 11 AM Pacific / 2 PM Eastern Time\n          ''
+[2022-11-17 12:47:01,907][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_6' Marked: '
+           EMBARGO: [6;30;42mJanuary 31, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+          '
+[2022-11-17 12:47:01,917][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_6' XPath: '/html/body/span/table[1]/tbody/tr/td/p[3]/span/span/strong'
+[2022-11-17 12:47:01,918][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_6' Offset_start: '0' Offset_end: '74'
+[2022-11-17 12:47:01,918][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_6' Plus: '12'
+[2022-11-17 12:47:01,919][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_6' Span: 'file_6'
+[2022-11-17 12:47:01,919][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_6' Raw: ''\n           Brain-computer interface allows completely locked-in people to communicate\n          ''
+[2022-11-17 12:47:01,921][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_6' Marked: '
+           [6;30;42mBrain-computer interface allows completely locked-in people to communicate[0m
+          '
+[2022-11-17 12:47:01,924][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_6' XPath: '/html/body/span/table[1]/tbody/tr/td/p[2]/span/span/strong'
+[2022-11-17 12:47:01,924][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_6' Offset_start: '9' Offset_end: '39'
+[2022-11-17 12:47:01,925][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_6' Plus: '12'
+[2022-11-17 12:47:01,926][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_6' Span: 'file_6'
+[2022-11-17 12:47:01,927][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_6' Raw: ''\n           EMBARGO: January 31, 2017 11 AM Pacific / 2 PM Eastern Time\n          ''
+[2022-11-17 12:47:01,928][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_6' Marked: '
+           EMBARGO: [6;30;42mJanuary 31, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+          '
+[2022-11-17 12:47:01,940][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_7' XPath: '/html/body/p[11]'
+[2022-11-17 12:47:01,941][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_7' Offset_start: '1' Offset_end: '137'
+[2022-11-17 12:47:01,942][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_7' Plus: '28'
+[2022-11-17 12:47:01,943][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_7' Span: 'file_7'
+[2022-11-17 12:47:01,943][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_7' Raw: ''\n\n    Full Citation:\n   \n   “Psychosexual Development and Satisfaction in Long-Term Survivors of Childhood Cancer: Neurotoxic Treatment Intensity as a Risk Indicator.” Vicky Lehmann, Marrit A. Tuinman, Madelaine C. Keim, Adrien M. Winning, Randal S.\n Olshefski, Rajinder P.S. Bajwa, Mari?¨t Hagedoorn, and Cynthia A. Gerhardt.\n   \n    CANCER\n   \n   ; Published Online: February 6, 2017 (DOI: 10.1002/cncr.30513).\n  ''
+[2022-11-17 12:47:01,944][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_7' Marked: '
+
+    Full Citation:
+   
+   “[6;30;42mPsychosexual Development and Satisfaction in Long-Term Survivors of Childhood Cancer: Neurotoxic Treatment Intensity as a Risk Indicator[0m.” Vicky Lehmann, Marrit A. Tuinman, Madelaine C. Keim, Adrien M. Winning, Randal S.
+ Olshefski, Rajinder P.S. Bajwa, Mari?¨t Hagedoorn, and Cynthia A. Gerhardt.
+   
+    CANCER
+   
+   ; Published Online: February 6, 2017 (DOI: 10.1002/cncr.30513).
+  '
+[2022-11-17 12:47:01,954][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_7' XPath: '/html/body/p[1]'
+[2022-11-17 12:47:01,955][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_7' Offset_start: '33' Offset_end: '73'
+[2022-11-17 12:47:01,956][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_7' Plus: '45'
+[2022-11-17 12:47:01,957][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_7' Span: 'file_7'
+[2022-11-17 12:47:01,957][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_7' Raw: ''\n\n\n     CANCER\n    \n\n\n    News Alert\n   \n\n   Embargo/Online Publication Date: 00:01 Hours ET, Monday, February 6, 2017\n   \n   [05.01 Hours UK Time (GMT)/16:01 Hours Australian Eastern Daylight Time (AEDT), February 6]\n  ''
+[2022-11-17 12:47:01,958][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_7' Marked: '
+
+
+     CANCER
+    
+
+
+    News Alert
+   
+
+   Embargo/Online Publication Date: [6;30;42m00:01 Hours ET, Monday, February 6, 2017[0m
+   
+   [05.01 Hours UK Time (GMT)/16:01 Hours Australian Eastern Daylight Time (AEDT), February 6]
+  '
+[2022-11-17 12:47:01,969][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_8' XPath: '/html/body/ul[1]/li/a/span[1]'
+[2022-11-17 12:47:01,970][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_8' Offset_start: '0' Offset_end: '71'
+[2022-11-17 12:47:01,970][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_8' Plus: '7'
+[2022-11-17 12:47:01,971][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_8' Span: 'file_8'
+[2022-11-17 12:47:01,971][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_8' Raw: ''\n      3-D reconstruction of skull suggests a small crocodile is a new species\n     ''
+[2022-11-17 12:47:01,972][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_8' Marked: '
+      [6;30;42m3-D reconstruction of skull suggests a small crocodile is a new species[0m
+     '
+[2022-11-17 12:47:01,983][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_8' XPath: '/html/body/p[11]/strong/span'
+[2022-11-17 12:47:01,984][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_8' Offset_start: '9' Offset_end: '40'
+[2022-11-17 12:47:01,985][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_8' Plus: '6'
+[2022-11-17 12:47:01,985][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_8' Span: 'file_8'
+[2022-11-17 12:47:01,986][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_8' Raw: ''\n     EMBARGO: February 15, 2017 11 AM Pacific / 2 PM Eastern Time\n    ''
+[2022-11-17 12:47:01,986][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_8' Marked: '
+     EMBARGO: [6;30;42mFebruary 15, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+    '
+[2022-11-17 12:47:01,993][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_8' XPath: '/html/body/p[13]/strong/span'
+[2022-11-17 12:47:01,994][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_8' Offset_start: '0' Offset_end: '71'
+[2022-11-17 12:47:01,996][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_8' Plus: '6'
+[2022-11-17 12:47:01,997][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_8' Span: 'file_8'
+[2022-11-17 12:47:01,998][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_8' Raw: ''\n     3-D reconstruction of skull suggests a small crocodile is a new species\n    ''
+[2022-11-17 12:47:01,999][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_8' Marked: '
+     [6;30;42m3-D reconstruction of skull suggests a small crocodile is a new species[0m
+    '
+[2022-11-17 12:47:02,004][INFO] LabelstudioToFonduer.to_label_studio:148 - Doc: 'file_8' XPath: '/html/body/p[11]/strong/span'
+[2022-11-17 12:47:02,005][INFO] LabelstudioToFonduer.to_label_studio:150 - Doc: 'file_8' Offset_start: '9' Offset_end: '40'
+[2022-11-17 12:47:02,006][INFO] LabelstudioToFonduer.to_label_studio:152 - Doc: 'file_8' Plus: '6'
+[2022-11-17 12:47:02,007][INFO] LabelstudioToFonduer.to_label_studio:153 - Doc: 'file_8' Span: 'file_8'
+[2022-11-17 12:47:02,007][INFO] LabelstudioToFonduer.to_label_studio:154 - Doc: 'file_8' Raw: ''\n     EMBARGO: February 15, 2017 11 AM Pacific / 2 PM Eastern Time\n    ''
+[2022-11-17 12:47:02,008][INFO] LabelstudioToFonduer.to_label_studio:156 - Doc: 'file_8' Marked: '
+     EMBARGO: [6;30;42mFebruary 15, 2017 11 AM Pacific[0m / 2 PM Eastern Time
+    '
