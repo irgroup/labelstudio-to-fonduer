@@ -1,6 +1,6 @@
 # Label Studio to Fonduer
-Label Studio to Fonduer is a small library to transfer annotations between Label Studio and Fonduer.
-By that, documents annotated in Label Studio can be used as gold labels in Fonduer and vice versa; annotations made in Fonduer can easily be accessed by humans in Label Studio.
+Label Studio to Fonduer is a small library to transfer annotations between [Label Studio](https://labelstud.io/) and [Fonduer](https://github.com/HazyResearch/fonduer).
+By that, documents annotated in Label Studio can be used as gold labels in Fonduer and vice versa annotations made in Fonduer can easily be accessed by humans in Label Studio.
 
 
 Label Studio and especially Fonduer create their own representation of an HTML document. 
