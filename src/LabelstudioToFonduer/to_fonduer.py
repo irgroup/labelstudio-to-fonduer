@@ -170,7 +170,7 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
 
     documents = []
     for task in export:
-        entiti_list = task["annotations"][0]["result"]
+        entities_list = task["annotations"][0]["result"]
 
         # get html key, may be different in the label-studio annotation view
         html_key = list(task["data"].keys())[0]
@@ -180,7 +180,7 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
         filename = "-".join(task["file_upload"].split("-")[1:])
 
         entities = []
-        for entity in entiti_list:
+        for entity in entities_list:
             if not entity.get("value"):
                 continue
             # offset
