@@ -170,8 +170,6 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
 
     documents = []
     for task in export:
-        entities_list = task["annotations"][0]["result"]
-
         # get html key, may be different in the label-studio annotation view
         html_key = list(task["data"].keys())[0]
         html_string = task["data"][html_key]
@@ -179,34 +177,38 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
         # get filename
         filename = "-".join(task["file_upload"].split("-")[1:])
 
-        entities = []
-        for entity in entities_list:
-            if not entity.get("value"):
-                continue
-            # offset
-            start_offset = entity["value"]["startOffset"]
-            end_offset = entity["value"]["endOffset"]
+        if task["annotations"]:
+            for entities in task["annotations"]:
+                entities_list = entities["result"]
 
-            # text
-            text = entity["value"]["text"]
-            label = entity["value"]["hypertextlabels"][0]
+                entities = []
+                for entity in entities_list:
+                    if not entity.get("value"):
+                        continue
+                    # offset
+                    start_offset = entity["value"]["startOffset"]
+                    end_offset = entity["value"]["endOffset"]
 
-            # Check for whitespaces in the labeling and adjust the offset accordingly
-            # Whitespaces will be striped later
-            if text.startswith(" "):
-                start_offset += 1
-            if text.endswith(" "):
-                end_offset -= 1
+                    # text
+                    text = entity["value"]["text"]
+                    label = entity["value"]["hypertextlabels"][0]
 
-            # XPath
-            xpath = entity["value"]["start"]
+                    # Check for whitespaces in the labeling and adjust the offset accordingly
+                    # Whitespaces will be striped later
+                    if text.startswith(" "):
+                        start_offset += 1
+                    if text.endswith(" "):
+                        end_offset -= 1
 
-            entities.append(
-                LabelStudioEntity(start_offset, end_offset, text.strip(), label, xpath, filename)
-            )
+                    # XPath
+                    xpath = entity["value"]["start"]
 
-        document = LabelStudioDocument(filename=filename, entities=entities, html=html_string)
-        documents.append(document)
+                    entities.append(
+                        LabelStudioEntity(start_offset, end_offset, text.strip(), label, xpath, filename)
+                    )
+
+                document = LabelStudioDocument(filename=filename, entities=entities, html=html_string)
+                documents.append(document)
     return LabelStudioExport(documents=documents, file_path=label_studio_export_path)
 
 
