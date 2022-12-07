@@ -28,6 +28,7 @@ class LabelStudioEntity:
         label (str): The assigned label of the entity.
         xpath (str): The XPath address of the element (full sentence) in the HTML document.
         filename (str): The file name of the document the entities originate from.
+        ls_id (str): Label Studio ID.
     """
     def __init__(
         self,
@@ -37,6 +38,7 @@ class LabelStudioEntity:
         label: str,
         xpath: str,
         filename: str,
+        ls_id,
     ) -> None:
         self.start_offset = start_offset
         self.end_offset = end_offset
@@ -44,12 +46,29 @@ class LabelStudioEntity:
         self.label = label
         self.xpath = xpath
         self.filename = filename
+        self.ls_id = ls_id
 
     def __str__(self) -> str:
         return f"Label-Studio entitie: Start offset: {self.start_offset}, End Offset: {self.end_offset}, Text: {self.text}, Label: {self.label}, XPath: {self.xpath}, Filename: {self.filename}"
 
     def __repr__(self) -> str:
         return f"<Entitie: start_offset: {self.start_offset}, end_offset: {self.end_offset}, text: {self.text}, label: {self.label}, xpath: {self.xpath}, filename: {self.filename}"
+
+
+class LabelStudioRelation:
+    """Representation of a Label Studio relation between two entities.
+
+    This object represents a relation between the entities with all relevant information. 
+
+    Args:
+        from_entity (LabelStudioEntity): The entity the relation is outgoing from.
+        to_entity (LabelStudioEntity): The entity the relation is going to.
+        direction (str): The direction of the relation.
+    """
+    def __init__(self, from_entity: LabelStudioEntity, to_entity: LabelStudioEntity, direction: str) -> None:
+        self.from_entity = from_entity
+        self.to_entity = to_entity
+        self.direction = direction
 
 
 class LabelStudioDocument:
@@ -62,11 +81,13 @@ class LabelStudioDocument:
         filename (str): File name of the document.
         entities (List[LabelStudioEntity]): List of all entities in that document.
         html (str): Original HTML string of the document.
+        relations (List[LabelStudioRelation]): List of all relations in that document.
     """
-    def __init__(self, filename: str, entities: List[LabelStudioEntity], html: str) -> None:
+    def __init__(self, filename: str, entities: List[LabelStudioEntity], html: str, relations: List[LabelStudioRelation]) -> None:
         self.filename = filename
         self.entities = entities
         self.html = html
+        self.relations = relations
 
     def __str__(self) -> str:
         return f"Label-Studio Document: File name: '{self.filename}' number entities: {len(self.entities)}."
@@ -182,32 +203,56 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
                 entities_list = entities["result"]
 
                 entities = []
+                relations = []
                 for entity in entities_list:
+                    # entity is relation
                     if not entity.get("value"):
-                        continue
-                    # offset
-                    start_offset = entity["value"]["startOffset"]
-                    end_offset = entity["value"]["endOffset"]
+                        relations.append(entity)
+                    else:
+                        # entity is entity
+                        # offset
+                        start_offset = entity["value"]["startOffset"]
+                        end_offset = entity["value"]["endOffset"]
 
-                    # text
-                    text = entity["value"]["text"]
-                    label = entity["value"]["hypertextlabels"][0]
+                        # text
+                        text = entity["value"]["text"]
+                        label = entity["value"]["hypertextlabels"][0]
 
-                    # Check for whitespaces in the labeling and adjust the offset accordingly
-                    # Whitespaces will be striped later
-                    if text.startswith(" "):
-                        start_offset += 1
-                    if text.endswith(" "):
-                        end_offset -= 1
+                        # Check for whitespaces in the labeling and adjust the offset accordingly
+                        # Whitespaces will be striped later
+                        if text.startswith(" "):
+                            start_offset += 1
+                        if text.endswith(" "):
+                            end_offset -= 1
+                        # Label Studio ID
+                        ls_id = entity["id"]
 
-                    # XPath
-                    xpath = entity["value"]["start"]
+                        # XPath
+                        xpath = entity["value"]["start"]
+                        entity_parsed = LabelStudioEntity(start_offset, end_offset, text.strip(), label, xpath, filename, ls_id)
+                        entities.append(entity_parsed)
+                
+                # Resolve relations
+                # If only two entoties and no relations parsed
+                if (not relations and len(entities) == 2):
+                    relation_parsed = LabelStudioRelation(entities[0], entities[1], "")
+                    document = LabelStudioDocument(filename=filename, entities=entities, html=html_string, relations=[relation_parsed])
+                else:
+                    relations_parsed = []
+                    for relation in relations:
+                        # Get the entities
+                        entity1 = None
+                        entity2 = None
+                        for entity in entities:
+                            if entity.ls_id == relation["from_id"]:
+                                entity1 = entity
+                            if entity.ls_id == relation["to_id"]:
+                                entity2 = entity
+                        # Get the relation direction
+                        direction = relation["direction"]
+                        relations_parsed.append(LabelStudioRelation(entity1, entity2, direction))
 
-                    entities.append(
-                        LabelStudioEntity(start_offset, end_offset, text.strip(), label, xpath, filename)
-                    )
-
-                document = LabelStudioDocument(filename=filename, entities=entities, html=html_string)
+                    document = LabelStudioDocument(filename=filename, entities=entities, html=html_string, relations=relations_parsed)
                 documents.append(document)
     return LabelStudioExport(documents=documents, file_path=label_studio_export_path)
 
@@ -344,7 +389,7 @@ class ToFonduer:
                 )
                 return None
 
-        document_id = (
+        document_id_loose = (
             self.fonduer_session.query(Document.id)
             .filter(Document.stable_id == document_id)
             .first()[0]
@@ -352,7 +397,7 @@ class ToFonduer:
         candidates = (
             self.fonduer_session.query(Sentence.id)
             .filter(
-                Sentence.document_id == document_id,
+                Sentence.document_id == document_id_loose,
                 Sentence.xpath == absolute_xpath,
                 Sentence.text.contains(entity.text),
             )
@@ -365,7 +410,7 @@ class ToFonduer:
                 .first()[0]
             )
             logger.warning(
-                f"Doc: '{document_name}': XPath not in fonduer database: XPath: '{absolute_xpath}', Text: '{entity.text}', Fonuer Document ID: '{document_id}'."
+                f"Doc: '{document_name}': No candidates found in Database that match: XPath: '{absolute_xpath}', Text: '{entity.text}', Fonuer Document ID: '{document_id_loose}'."
             )
             return None
         elif len(candidates) > 1:
@@ -398,32 +443,25 @@ class ToFonduer:
 
         gold_table = []
         label = self.label_studio_export.label()
+
         assert len(label) == 2
 
         for document in self.label_studio_export.documents:
-            # exclude maleformed or incomplete documents
-            if len(document.entities) != 2:
-                logger.warning(
-                    f"Doc: '{document.filename}': Skip doc, it has not exactly two entities."
-                )
-                continue
-
             # Create entity dict
             features = {}
-            for entity in document.entities:
-                feature = get_features(entity)
-                if not all(feature):
+            for relation in document.relations:
+                features_from = get_features(relation.from_entity)
+                features_to = get_features(relation.to_entity)
+
+                if not (all(features_from) and all(features_to)):
                     logger.warning(
                         f"Doc:  '{document.filename}': Skipping entity, not all features set."
                     )
                     continue
                 else:
-                    features[entity.label.lower()] = feature
+                    features[relation.from_entity.label.lower()] = features_from
+                    features[relation.to_entity.label.lower()] = features_to
 
-            # check if two features extracted
-            if len(features) == 2:
-
-                # check if IDs are matching
                 if (
                     features[list(features.keys())[0]]["document_id"]
                     == features[list(features.keys())[1]]["document_id"]
@@ -433,8 +471,6 @@ class ToFonduer:
                     logger.warning(
                         f"Doc: '{document.filename}': Feature document IDs not matching."
                     )
-            else:
-                logger.warning(f"Doc: '{document.filename}': Not parsable.")
 
         return gold_table
 
