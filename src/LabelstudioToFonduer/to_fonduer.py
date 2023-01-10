@@ -443,7 +443,7 @@ class ToFonduer:
         gold_table = []
         label = self.label_studio_export.label()
 
-        assert len(label) == 2
+        assert len(label) == 2, "Only exports with exactly two entity types supported."
 
         for document in self.label_studio_export.documents:
             # Create entity dict

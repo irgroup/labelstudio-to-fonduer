@@ -182,11 +182,11 @@ class ConversionChecker:
         # Import Document
         corpus_parser = Parser(session, structural=True, lingual=True, flatten=[])
         corpus_parser.apply(doc_preprocessor, parallelism=self.paralel)
-        assert session.query(Document).count() == 1
+        assert session.query(Document).count() == 1, "Not exactly one document imported"
 
         # Export parsed document
         documents = session.query(Document).all()
-        assert len(documents) == 1
+        assert len(documents) == 1, "Not exactly one document exported"
         html_str = documents[0].text
         filename = documents[0].name
 
@@ -218,11 +218,11 @@ class ConversionChecker:
                 self.label_studio_url + f"/api/projects/{project.id}/tasks/",
                 headers={"Authorization": "Token " + self.label_studio_api_key},
             )
-            assert r.status_code == 204
+            assert r.status_code == 204, "Could not delete tasks"
 
         # Connect to the Label Studio API and check the connection
         ls = Client(url=self.label_studio_url, api_key=self.label_studio_api_key)
-        assert ls.check_connection().get("status") == "UP"
+        assert ls.check_connection().get("status") == "UP", "Label Studio is not running"
 
         # setup project
         projects = {project.get_params()["title"]: project.id for project in ls.list_projects()}
@@ -234,7 +234,7 @@ class ConversionChecker:
 
         # load file
         files = os.listdir(docs_path)
-        assert len(files) == 2
+        assert len(files) == 2, "Not exactly two files in the directory"
         for file_name in files:
             if file_name.startswith("ORIGINAL"):
                 break
@@ -250,7 +250,7 @@ class ConversionChecker:
 
         # export html
         tasks = project.get_tasks()
-        assert len(tasks) == 1
+        assert len(tasks) == 1, "Not exactly one task exported"
 
         tasks[0]["data"].keys()
 
@@ -269,7 +269,7 @@ class ConversionChecker:
 
         def load_html(prefix, docs_path):
             file_names = os.listdir(docs_path)
-            assert file_names
+            assert file_names, "No files in the directory"
             for file_name in file_names:
                 if file_name.startswith(prefix):
                     break
