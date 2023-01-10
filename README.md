@@ -17,7 +17,7 @@ Therefore, the documents need to be converted into a structure that does not nee
 ## Installation:
 
 ```Bash
-pip install git+https://github.com/irgroup/labelstudio-to-fonduer.git@v0.2.1#egg=labelstudiotofonduer\&subdirectory=src
+pip install git+https://github.com/irgroup/labelstudio-to-fonduer.git@v0.2.2#egg=labelstudiotofonduer\&subdirectory=src
 ```
 
 ## Documentation:
