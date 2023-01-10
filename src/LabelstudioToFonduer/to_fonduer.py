@@ -14,7 +14,6 @@ from .util import init_logger
 
 logger = init_logger(__name__)
 
-
 # Data model
 class LabelStudioEntity:
     """Representation of a Label Studio entity from a document of an export.
@@ -448,8 +447,8 @@ class ToFonduer:
 
         for document in self.label_studio_export.documents:
             # Create entity dict
-            features = {}
             for relation in document.relations:
+                features = {}
                 features_from = get_features(relation.from_entity)
                 features_to = get_features(relation.to_entity)
 

@@ -250,7 +250,6 @@ class ModifiedSpacyParser(LingualParser):
         :param text: The text of the parent paragraph of the sentences
         :return:
         """
-
         if self.model.has_pipe("sentence_boundary_detector"):
             self.model.remove_pipe(name="sentence_boundary_detector")
 
@@ -335,7 +334,7 @@ def set_custom_boundary(doc: Doc) -> Doc:
 
 
 class TokenPreservingTokenizer(object):
-    """Token perserving tokenizer.
+    """Token preserving tokenizer.
 
     This custom tokenizer simply preserves the tokenization that was already
     performed during sentence splitting. It will output a list of space

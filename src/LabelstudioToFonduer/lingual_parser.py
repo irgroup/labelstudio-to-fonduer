@@ -252,7 +252,6 @@ class ModifiedSpacyParser(LingualParser):
         :param text: The text of the parent paragraph of the sentences
         :return:
         """
-
         if self.model.has_pipe("sentence_boundary_detector"):
             self.model.remove_pipe(name="sentence_boundary_detector")
 

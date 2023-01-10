@@ -6,7 +6,7 @@ import html
 
 import os
 import shutil
-from typing import Optional
+from typing import Optional, List
 
 import label_studio_sdk
 import requests
@@ -16,13 +16,13 @@ from fonduer import Meta
 from fonduer.parser import Parser
 from fonduer.parser.models import Document
 from label_studio_sdk import Client
+import lxml.etree
 
 from LabelstudioToFonduer.util import init_logger
 # from .util import init_logger
 from LabelstudioToFonduer.fonduer_tools import save_create_project
 # from .fonduer_tools import save_create_project
 from LabelstudioToFonduer.document_processor import My_HTMLDocPreprocessor
-
 
 logger = init_logger(__name__)
 
@@ -43,6 +43,14 @@ class UnsortedAttributes(HTMLFormatter):
 class DocumentConverter:
     """Convert documents so that they are natevly supportet by Fonduer and look the
     same after Fonduer processes them."""
+    def __init__(self, flatten: List[str] = ["em"]):
+        """Initialize the DocumentConverter.
+
+        Args:
+            flatten (List[str], optional): List of tags that should be flattened. Defaults to ["em"].
+        """
+        self.flatten = flatten
+
 
     def convert_one(
         self, document_path: str, output_path: str, encoding: Optional[str] = None
@@ -67,8 +75,16 @@ class DocumentConverter:
             else:
                 with open(document_path, "r") as file:
                     html_string = file.read()
+                
 
-                soup = BeautifulSoup(html_string, "html.parser")
+            root = lxml.html.fromstring(html_string)
+            # flattens children of node that are in the 'flatten' list
+            if self.flatten:
+                lxml.etree.strip_tags(root, self.flatten)
+            
+            html_string = lxml.etree.tostring(root, encoding="unicode")
+
+            soup = BeautifulSoup(html_string, "html.parser")
 
             # Fix comment strip issue
             for comments in soup.findAll(text=lambda text: isinstance(text, Comment)):

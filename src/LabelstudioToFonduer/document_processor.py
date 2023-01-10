@@ -55,13 +55,16 @@ class My_HTMLDocPreprocessor(DocPreprocessor):
                 raise NotImplementedError(
                     f"Expecting exactly one html element per html file: {file_name}"
                 )
+            # basic text processing
             text = all_html_elements[0]
+            text = str(text).replace("\n", "")  # remove newlines
+            
             name = os.path.basename(document_path)[: os.path.basename(document_path).rfind(".")]
             stable_id = self._get_stable_id(name)
             yield Document(
                 name=name,
                 stable_id=stable_id,
-                text=str(text),
+                text=text,
                 meta={"file_name": file_name},
             )
 
