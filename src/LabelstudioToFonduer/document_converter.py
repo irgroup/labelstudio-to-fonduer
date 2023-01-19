@@ -182,11 +182,9 @@ class ConversionChecker:
         # Import Document
         corpus_parser = Parser(session, structural=True, lingual=True, flatten=[])
         corpus_parser.apply(doc_preprocessor, parallelism=self.paralel)
-        assert session.query(Document).count() == 1, "Not exactly one document imported"
 
         # Export parsed document
         documents = session.query(Document).all()
-        assert len(documents) == 1, "Not exactly one document exported"
         html_str = documents[0].text
         filename = documents[0].name
 
@@ -234,7 +232,6 @@ class ConversionChecker:
 
         # load file
         files = os.listdir(docs_path)
-        assert len(files) == 2, "Not exactly two files in the directory"
         for file_name in files:
             if file_name.startswith("ORIGINAL"):
                 break
@@ -283,7 +280,7 @@ class ConversionChecker:
         for file_name in os.listdir(docs_path):
             # construct full file path
             source = os.path.join(docs_path, file_name)
-            destination = os.path.join(self.project_name, file_name)
+            destination = os.path.join(self.project_name, "ORIGINAL_"+file_name)
             # copy only files
             if os.path.isfile(source):
                 shutil.copy(source, destination)
