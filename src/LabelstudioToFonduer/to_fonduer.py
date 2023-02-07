@@ -2,9 +2,11 @@
 """Convert Label Studio annotations to Fonduer Annotations.
 """
 import json
+import os
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+import bs4 as bs
 import lxml
 import pandas as pd
 import sqlalchemy
@@ -173,8 +175,18 @@ class LabelStudioExport:
         return f"<Export filename: {self.file_path}, num_documents: {len(self.documents)}>"
 
 
+def jaccard_similarity(x,y):
+    def tokenize(s):
+        return re.split('\s+', s)
+    x = tokenize(x)
+    y = tokenize(y)
+    intersection_cardinality = len(set.intersection(*[set(x), set(y)]))
+    union_cardinality = len(set.union(*[set(x), set(y)]))
+    return intersection_cardinality/float(union_cardinality)
+
+
 # Export parser into class
-def parse_export(label_studio_export_path: str) -> LabelStudioExport:
+def parse_export(label_studio_export_path: str, reference_dir: str = "") -> LabelStudioExport:
     """Parse a Label Studio export JSON file into an Export object. The parser extracts documents
     and entities and the relevant features to match label studio annotations with fonduer
     annotations.
@@ -187,6 +199,18 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
     """
     with open(label_studio_export_path, "r") as file:
         export = json.load(file)
+    
+    # Get original filenames from reference directory
+    if reference_dir:
+        files = os.listdir(reference_dir)
+        reference = {}
+
+        for file in files:
+            with open(f"/workspace/data/mails_sm/converted/{file}", "r") as f:
+                html_str = f.read()
+            reference[file] = bs.BeautifulSoup(html_str, 'lxml').text
+
+
 
     documents = []
     for task in export:
@@ -195,7 +219,16 @@ def parse_export(label_studio_export_path: str) -> LabelStudioExport:
         html_string = task["data"][html_key]
 
         # get filename
-        filename = "-".join(task["file_upload"].split("-")[1:])
+        if reference_dir:
+            text = bs.BeautifulSoup(j["data"]["text"], 'lxml').text
+            sims = {}
+            for k, v in reference.items():
+                sim = jaccard_similarity(v, text)
+                sims[k] = sim
+            filename = sorted(sims.items(), key=lambda x:x[1], reverse=True)[0][0]
+
+        else: 
+            filename = "-".join(task["file_upload"].split("-")[1:])
 
         if task["annotations"]:
             for entities in task["annotations"]:
