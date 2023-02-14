@@ -108,10 +108,12 @@ class LabelStudioExport:
         documents (List[LabelStudioDocument]): Parsed documents that are labeled in the Label
         Studio export.
         file_path (str): Path to the `export.json` file from Label Studio.
+        num_relations (int): Number of relations in the export.
     """
     def __init__(self, documents: List[LabelStudioDocument], file_path: str) -> None:
         self.documents = documents
         self.file_path = file_path
+        self.num_relations = sum([len(doc.relations) for doc in documents])
 
     def label(self) -> Set[str]:
         """Get a set of all labels that were assigned in Label Studio.
@@ -175,7 +177,13 @@ class LabelStudioExport:
         return f"<Export filename: {self.file_path}, num_documents: {len(self.documents)}>"
 
 
-def jaccard_similarity(x,y):
+def jaccard_similarity(x: str,y: str) -> float:
+    """Claculate the jaccard similarity between two strings to aligne HTMLs with titles.
+
+    Args:
+        x (str): One string for comparision.
+        y (str): Second string for comparision.
+    """
     def tokenize(s):
         return re.split('\s+', s)
     x = tokenize(x)
@@ -234,7 +242,7 @@ def parse_export(label_studio_export_path: str, reference_dir: str = "") -> Labe
             for entities in task["annotations"]:
                 entities_list = entities["result"]
 
-                entities = []
+                entities = {}
                 relations = []
                 for entity in entities_list:
                     # entity is relation
@@ -262,7 +270,7 @@ def parse_export(label_studio_export_path: str, reference_dir: str = "") -> Labe
                         # XPath
                         xpath = entity["value"]["start"]
                         entity_parsed = LabelStudioEntity(start_offset, end_offset, text.strip(), label, xpath, filename, ls_id)
-                        entities.append(entity_parsed)
+                        entities[ls_id] = entity_parsed
                 
                 # Resolve relations
                 # If only two entoties and no relations parsed
@@ -272,19 +280,18 @@ def parse_export(label_studio_export_path: str, reference_dir: str = "") -> Labe
                 else:
                     relations_parsed = []
                     for relation in relations:
-                        # Get the entities
-                        entity1 = None
-                        entity2 = None
-                        for entity in entities:
-                            if entity.ls_id == relation["from_id"]:
-                                entity1 = entity
-                            if entity.ls_id == relation["to_id"]:
-                                entity2 = entity
-                        # Get the relation direction
+                        from_ = entities.get(relation["from_id"])
+                        to_ = entities.get(relation["to_id"])
                         direction = relation["direction"]
-                        relations_parsed.append(LabelStudioRelation(entity1, entity2, direction))
 
-                    document = LabelStudioDocument(filename=filename, entities=entities, html=html_string, relations=relations_parsed)
+                        if not from_ or not to_ or not direction: 
+                            logger.warning(
+                                f"Relation {relation['id']} could not be resolved."
+                            )
+                            continue
+
+                        relations_parsed.append(LabelStudioRelation(from_, to_, direction))
+                    document = LabelStudioDocument(filename=filename, entities=entities.values(), html=html_string, relations=relations_parsed)
                 documents.append(document)
     return LabelStudioExport(documents=documents, file_path=label_studio_export_path)
 
@@ -476,7 +483,7 @@ class ToFonduer:
         gold_table = []
         label = self.label_studio_export.label()
 
-        assert len(label) == 2, "Only exports with exactly two entity types supported."
+        # assert len(label) == 2, "Only exports with exactly two entity types supported."
 
         for document in self.label_studio_export.documents:
             # Create entity dict
